@@ -6,6 +6,7 @@
 
 <script>
 import * as d3 from "d3"
+import common from "./common";
 
 export default {
   name: "AxisBubble",
@@ -17,6 +18,12 @@ export default {
         height: 120,
         maxBubbleNum: 15,
         dataRange: 255
+    }
+  },
+  props:{
+    addMouseMove: {
+      default: false,
+      type: Boolean
     }
   },
   // props: ['shownData', 'timeRange'],
@@ -42,34 +49,30 @@ export default {
       svg.append('g').attr("transform", `translate(0,${this.height - margin.bottom})`).call(xAxis)
 
       //然后，绘制圆形在坐标轴上
+      // 循环几次key 也是多行的那种Object.keys()
+      let idx = 0
+      for (let K in this.shownData) {
+        let d = this.shownData[K]
+        let bubbleNum = Math.min(this.maxBubbleNum, d.length), bbWidth = Math.floor(d.length / bubbleNum)
+        d.length = bbWidth * bubbleNum
+        let avg, cx, cy, r, clientW = this.width - margin.left - margin.right,
+          clientH = this.height - margin.top - margin.bottom
+        let rowH = clientH / Object.keys(this.shownData).length
 
-      let d = this.shownData
-      let bubbleNum = Math.min(this.maxBubbleNum, d.length), bbWidth = Math.floor(d.length / bubbleNum)
-      d.length = bbWidth * bubbleNum
-      let avg, cx, cy, r, clientW = this.width - margin.left - margin.right, clientH = this.height - margin.top - margin.bottom
-      for(let i = 0; i < d.length; i += bbWidth){
-        avg = 0
-        for(let j = 0; j < bbWidth; ++j) avg += d[i + j];
-        avg /= bbWidth
+        for (let i = 0; i < d.length; i += bbWidth) {
+          avg = 0
+          for (let j = 0; j < bbWidth; ++j) avg += d[i + j];
+          avg /= bbWidth
 
-        cx = clientW * (i + bbWidth / 2) / d.length + margin.left
-        cy = margin.top + clientH / 2
-        r = (avg / this.dataRange) * (clientH * 0.5)
-        console.log(r)
-        // add bubble
-        svg.append('g').append('circle').attr('cx',cx).attr('cy',cy).attr('r',r).style('fill', '#c2326c')
-        // svg
-        //   .append("g")
-        //   .selectAll("bubble")
-        //   .data([{'cx': cx,'cy': cy, 'r': r}])
-        //   .enter()
-        //   .append("circle")
-        //   .attr("cx", d => x(d.cx) + 50)
-        //   .attr("cy", d => y(d.cy))
-        //   .attr("r", d => d.r)
-        //   .style("fill", "lightcyan")
-        //   .style("opacity", "0.7")
-        //   .attr("stroke", "black");
+          cx = clientW * (i + bbWidth / 2) / d.length + margin.left
+          cy = margin.top + rowH * (idx + 0.5)
+          r = (avg / this.dataRange) * (rowH * 1)
+          console.log(r)
+          // add bubble
+          svg.append('g').append('circle').attr('cx', cx).attr('cy', cy).attr('r', r).style('fill', common.colorTheme[idx])
+        }
+
+        idx++
       }
       return svg.node()
     },
@@ -85,11 +88,13 @@ export default {
   //     this.draw()
   //   }
   // }
-  // mounted() {
-  //   // 此时div的大小应当是确定好了的，因此记录一下
-  //   // this.width = this.$refs["main-div"].clientWidth
-  //   // this.height = this.$refs["main-div"].clientHeight
-  // }
+  mounted() {
+    let w = this.$el.style.width, h = this.$el.style.height
+    w = Number(w.substr(0, w.length-2))
+    h = Number(h.substr(0, h.length-2))
+    this.width = w
+    this.height = h
+  }
 }
 </script>
 

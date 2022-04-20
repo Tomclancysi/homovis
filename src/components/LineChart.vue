@@ -15,7 +15,19 @@ export default {
   data(){
     return {
       width: 500,
-      height: 200
+      height: 200,
+      paths: [],
+      pathTags: [],
+      margin: {
+        top: 20,
+        right: 30,
+        bottom: 30,
+        left: 40
+      },
+      _xscale: null,
+      _yscale: null,
+      offset: 3,
+      threshold: 100
     }
   },
   props: {
@@ -71,6 +83,44 @@ export default {
         else
           console.log('wrong when draw lines')
       },
+      intersect(x, y){
+        for(let idx = 0; idx < this.paths.length; ++idx){
+          // console.log(this.offset, this.threshold)
+          let i = Math.max(0, x - this.offset), j = Math.min(this.paths[idx].length-1, x+this.offset)
+          for(; i <= j; ++i){
+            if(Math.pow(x - i, 2) + Math.pow(y - this.paths[idx][i][1], 2) <= this.threshold)
+              return idx
+          }
+        }
+        return -1
+      },
+      mouseMoveHandle(event){
+        let ox = event.offsetX, oy = event.offsetY
+        if(ox >= this.margin.left && ox <= this.width - this.margin.right && oy >= this.margin.top && oy <= this.height - this.margin.bottom){
+          // let x = ox - this.margin.left, y = this.height - margin.bottom - oy, idx = -1
+          // x y都应该从scale反映射回去！
+          let x = parseInt(this._xscale.invert(ox)), y = this._yscale.invert(oy), idx = -1
+          // console.log({x,y})
+          if((idx = this.intersect(x, y)) != -1){
+            // 将选中的线条设置为好康的，其他设置为透明
+            for(let i = 0; i < this.paths.length; ++i){
+              if (i == idx){
+                this.pathTags[i].style.strokeWidth = "5"
+                this.pathTags[i].style.opacity = "1"
+              }
+              else{
+                this.pathTags[i].style.opacity = "0.1"
+                this.pathTags[i].style.strokeWidth = "1.5"
+              }
+            }
+          }
+          else{
+            // 将所有线条设置为默认style
+            for(let i = 0; i < this.paths.length; ++i)
+              this.pathTags[i].style.strokeWidth = "1.5", this.pathTags[i].style.opacity = "1"
+          }
+        }
+      },
       createLineChart(dataObject, {
         hiddenAxis = false,
         x = ([x]) => x, // given d in data, returns the (temporal) x-value
@@ -111,6 +161,8 @@ export default {
         if (yDomain === undefined) yDomain = [min, max];
         const xScale = xType(xDomain, xRange);
         const yScale = yType(yDomain, yRange);
+        this._xscale = xScale
+        this._yscale = yScale
         const svg = d3.create("svg")
           .attr("width", width)
           .attr("height", height)
@@ -118,6 +170,8 @@ export default {
           .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
 
         // Compute values.
+        this.paths.length = 0
+        this.pathTags.length = 0
         let idx = 0
         for (let k in dataObject) {
           let data = dataObject[k]
@@ -140,14 +194,17 @@ export default {
             .y(i => yScale(Y[i]));
 
           // 真正画折线图的时候
-          svg.append("path")
+          this.pathTags.push(
+            svg.append("path")
             .attr("fill", "none")
             .attr("stroke", color)
             .attr("stroke-width", strokeWidth)
             .attr("stroke-linecap", strokeLinecap)
             .attr("stroke-linejoin", strokeLinejoin)
             .attr("stroke-opacity", strokeOpacity)
-            .attr("d", line(I));
+            .attr("d", line(I)).node()
+          )
+          this.paths.push(data)
         }
 
         // 画时间线的时候，用另一个scale
@@ -176,12 +233,18 @@ export default {
               .text(yLabel));
         }
 
-        console.log(svg.node())
+        // console.log(svg.node())
         return svg.node();
       }
   },
   mounted() {
-    this.$refs.testdiv.appendChild(this.draw())
+    let w = this.$el.style.width, h = this.$el.style.height
+    w = Number(w.substr(0, w.length-2))
+    h = Number(h.substr(0, h.length-2))
+    this.width = w
+    this.height = h
+    this.$el.addEventListener("mousemove", this.mouseMoveHandle)
+    // this.$refs.testdiv.appendChild(this.draw())
   },
 
   // watch: {

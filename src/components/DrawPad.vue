@@ -209,8 +209,13 @@ export default {
       this.sigCanvas = this.$refs.sigCanvas
       this.context = this.sigCanvas.getContext("2d")
       this.context.strokeStyle = '#c2326c' // 离谱 这里设置过为啥不行？？
-      this.width = this.sigCanvas.width
-      this.height = this.sigCanvas.height
+      let w = this.$el.style.width, h = this.$el.style.height
+      w = Number(w.substr(0, w.length-2))
+      h = Number(h.substr(0, h.length-2))
+      this.width = w
+      this.height = h
+      this.sigCanvas.width = w
+      this.sigCanvas.height = h
       let bbox = this.$refs.sigCanvas.getBoundingClientRect()
       this.offsetLeft = bbox.left
       this.offsetTop = bbox.top

@@ -29,14 +29,21 @@
 <!--      </div>-->
 <!--      </el-col>-->
 
-      <el-col :span="6">
+      <el-col :span="3">
         <el-tag type="success">经度： {{this.lng.toFixed(2)}}</el-tag>
         <el-tag type="success">纬度： {{this.lat.toFixed(2)}}</el-tag>
       </el-col>
       <el-col :span="3" class="current-date-range">
         <el-tag type="success">日期：{{this.currentDate.start == this.currentDate.end ? this.currentDate.start : `${this.currentDate.start} to ${this.currentDate.end}`}}</el-tag>
       </el-col>
-
+      <el-col :span="3">
+        <span class="label">Mode</span>
+        <el-switch
+          v-model="timeAxisMode"
+          active-color="#13ce66"
+          inactive-color="#ff4949">
+        </el-switch>
+      </el-col>
     </el-row>
 
 
@@ -48,33 +55,47 @@
         </div>
       </el-col>
       <!--在地图的右边就是几个量表了-->
-      <el-col v-if="this.timeAxisMode" :span="12">
-        <!--第一行做什么-->
-        <el-row :gutter="20" style="width: 500px; height: 200px">
-          <LineChart  :shown-data="this.testData" ref="line-chart">line chart1</LineChart>
-        </el-row>
-        <!--第二行做什么-->
-        <!--在这个地方设置宽度高度是否有意义？？？-->
-        <el-row style="width: 500px; height: 200px">
-          <AxisBubble ref="axis-bubble"></AxisBubble>
-        </el-row>
+<!--      <el-col v-if="this.timeAxisMode" :span="12">-->
+<!--        &lt;!&ndash;第一行做什么&ndash;&gt;-->
+<!--        <el-row :gutter="20" style="width: 500px; height: 200px">-->
+<!--          <LineChart  :shown-data="this.testData" ref="line-chart">line chart1</LineChart>-->
+<!--        </el-row>-->
+<!--        &lt;!&ndash;第二行做什么&ndash;&gt;-->
+<!--        &lt;!&ndash;在这个地方设置宽度高度是否有意义？？？&ndash;&gt;-->
+<!--        <el-row style="width: 500px; height: 200px">-->
+<!--          <AxisBubble ref="axis-bubble"></AxisBubble>-->
+<!--        </el-row>-->
 
-        <el-row :gutter="20" style="width: 500px; height: 200px">
-          <DrawPad></DrawPad>
-        </el-row>
+<!--        <el-row :gutter="20" style="width: 500px; height: 200px">-->
+<!--          <DrawPad></DrawPad>-->
+<!--        </el-row>-->
 
-        <el-row>
-          <ImageGallery ref="image-table" style="width: 500px"></ImageGallery>
-        </el-row>
-      </el-col>
+<!--        <el-row>-->
+<!--          <ImageGallery ref="image-table" style="width: 500px"></ImageGallery>-->
+<!--        </el-row>-->
+<!--      </el-col>-->
+
+<!--      <div id="line-chart-row1" style="position: absolute; left: 1048px; top: 0px; width: 800px; height: 600px">-->
+        <LineChart v-if="timeAxisMode" class="need-shadow" :shown-data="this.testData" ref="line-chart" style="position: absolute; left: 1048px; top: 0px; width: 1000px; height: 430px">line chart1</LineChart>
+<!--      </div>-->
+<!--      <div id="bubble-chart-row2" style="left: 1048px; top: 620px; width: 800px; height: 600px">-->
+        <AxisBubble v-if="timeAxisMode" class="need-shadow" ref="axis-bubble" :addMouseMove="true" style="position: absolute; left: 1048px; top: 440px; width: 1000px; height: 400px"></AxisBubble>
+<!--      </div>-->
+<!--      <div id="draw-pad-row3" style="left: 1048px; top: 1260px; width: 800px; height: 400px">-->
+        <DrawPad v-if="timeAxisMode" class="need-shadow" style="position: absolute; left: 1048px; top: 850px; width: 1000px; height: 300px"></DrawPad>
+<!--      </div>-->
+<!--      <div id="images-row4" style="left: 1048px; top: 1680px; width: 800px; height: 400px">-->
+        <ImageGallery v-if="!timeAxisMode" class="need-shadow" ref="image-table" style="position: absolute; left: 1048px; top: 0px; width: 800px; height: 400px"></ImageGallery>
+<!--      </div>-->
+
     </el-row>
 
-    <el-row class="row3">
-      <el-col :span="12">
-        <TimeBrush ref="time-brush">5LiA5Z2o6IO96LeR5b6XIGEgcnVubmluZyBzaGl0</TimeBrush>
-      </el-col>
-      <el-col :span="6">
-        <div ref="panel">
+<!--    <el-row class="row3">-->
+<!--      <el-col :span="10">-->
+        <TimeBrush ref="time-brush" style="position: absolute; left: 0px; top: 1124px; width: 1024px; height: 120px">brush</TimeBrush>
+<!--      </el-col>-->
+<!--      <el-col :span="6">-->
+        <div v-if="!timeAxisMode" ref="panel" style="position: absolute; left: 1048px; top: 1124px; width: 800px; height: 400px">
 
           <div>
             <template>
@@ -104,23 +125,24 @@
             <el-slider v-model="brushSize"></el-slider>
           </div>
         </div>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="6">
+<!--      </el-col>-->
+<!--    </el-row>-->
+<!--    <el-row>-->
+<!--      <el-col :span="6">-->
       <RectSelector :map="this.map" ref="rect-selector">test</RectSelector>
-      </el-col>
-    </el-row>
+<!--      </el-col>-->
+<!--    </el-row>-->
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3';
+window.d3 = d3
 // import "../plugins/leaflet-d3/src/js/hexbin/HexbinLayer";
 // import "heatmap.js";
 import "@asymmetrik/leaflet-d3";
 import '../plugins/leaflet-heat'
-import "leaflet-pather"
+require("leaflet-pather")
 import axios from "axios"
 
 import common from "./common";
@@ -181,8 +203,8 @@ export default {
     let st = new Date(common.getDatasetConfig('timeStart')['string'])
     let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
 
-    this.$refs["axis-bubble"].setData(this.testData, [st, ed])
-    this.$refs["axis-bubble"].draw()
+    // this.$refs["axis-bubble"].setData(this.testData, [st, ed])
+    // this.$refs["axis-bubble"].draw()
 
     this.hiddenCanvas = document.createElement('canvas');
     this.hiddenCanvas.width = 1024; //又又又又又又又又又又又一个hardcode，记得更改
@@ -277,7 +299,7 @@ export default {
     // 更改时序曲线的展示方式
     bus.$on("WhoCanShowThis", (json)=>{
       let K = Object.keys(json)
-      let d0 = json[K[0]]
+      // let d0 = json[K[0]]
 
       // 在地图上添加marker
       let idx = 0
@@ -314,7 +336,7 @@ export default {
 
       let st = new Date(common.getDatasetConfig('timeStart')['string'])
       let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
-      this.$refs["axis-bubble"].setData(d0, [st, ed])
+      this.$refs["axis-bubble"].setData(json, [st, ed])
       this.$refs["axis-bubble"].draw()
 
       this.$refs["line-chart"].shownData = json
@@ -371,9 +393,8 @@ export default {
     })
 
     // 添加一个queryLayer默认pather
-    debugger
     this.queryLayer = new L.Pather()
-    this.map.addLayer(this.queryLayer)
+    // this.map.addLayer(this.queryLayer)
   },
   destroyed() {
     bus.$off('ChangeDataset')
@@ -628,5 +649,8 @@ export default {
 </script>
 
 <style scoped>
-
+.need-shadow {
+  box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2),
+  0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
 </style>
