@@ -1,0 +1,18 @@
+{
+  "name": "aqi",
+  "description": "month从零开始！",
+  "timeStart": {
+    "year": 2017,
+    "month": 3,
+    "day": 11,
+    "hour": 0
+  },
+  "timeEnd": {
+    "year": 2017,
+    "month": 5,
+    "day": 27,
+    "hour": 22
+  },
+  "interval": 2
+
+}

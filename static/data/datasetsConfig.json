@@ -1,0 +1,101 @@
+{
+  "aqi": {
+    "name": "aqi",
+    "description": "month从零开始",
+    "timeStart": {
+      "year": 2017,
+      "month": 3,
+      "day": 11,
+      "hour": 0,
+      "string": "2017-04-10T16:00:00.000Z"
+    },
+    "timeEnd": {
+      "year": 2017,
+      "month": 5,
+      "day": 27,
+      "hour": 22,
+      "string": "2017-06-27T14:00:00.000Z"
+    },
+    "interval": "2 hour",
+    "type": "heatmap",
+    "map": {
+      "centerLat": 33.89511,
+      "centerLng": 114.1582,
+      "zoom": 5
+    },
+    "colormap": {
+      "0.15": "rgb(1,228,0)",
+      "0.30": "rgb(255,255,0)",
+      "0.45": "rgb(255,126,0)",
+      "0.60": "rgb(255,0,0)",
+      "0.75": "rgb(153,0,76)",
+      "1.0": "rgb(126,0,35)"
+    }
+  },
+  "covid": {
+    "name": "covid",
+    "description": "month从零开始",
+    "timeStart": {
+      "year": 2022,
+      "month": 2,
+      "day": 6,
+      "hour": 0,
+      "string": "2022-03-05T16:00:00.000Z"
+    },
+    "timeEnd": {
+      "year": 2022,
+      "month": 2,
+      "day": 30,
+      "hour": 24,
+      "string": "2022-03-29T16:00:00.000Z"
+    },
+    "interval": "2 hour",
+    "type": "heatmap",
+    "map": {
+      "centerLat": 31.119880243,
+      "centerLng": 121.391788947,
+      "zoom": 10
+    },
+    "colormap": {
+      "0.15": "rgb(1,228,0)",
+      "0.30": "rgb(255,255,0)",
+      "0.45": "rgb(255,126,0)",
+      "0.60": "rgb(255,0,0)",
+      "0.75": "rgb(153,0,76)",
+      "1.0": "rgb(126,0,35)"
+    }
+  },
+  "nightlight": {
+    "name": "nightlight",
+    "description": "北京",
+    "timeStart": {
+      "year": 2022,
+      "month": 2,
+      "day": 6,
+      "hour": 0,
+      "string": "2022-03-05T16:00:00.000Z"
+    },
+    "timeEnd": {
+      "year": 2022,
+      "month": 2,
+      "day": 30,
+      "hour": 24,
+      "string": "2022-03-29T16:00:00.000Z"
+    },
+    "interval": "2 hour",
+    "type": "heatmap",
+    "map": {
+      "centerLat": 31.119880243,
+      "centerLng": 121.391788947,
+      "zoom": 10
+    },
+    "colormap": {
+      "0.15": "rgb(1,228,0)",
+      "0.30": "rgb(255,255,0)",
+      "0.45": "rgb(255,126,0)",
+      "0.60": "rgb(255,0,0)",
+      "0.75": "rgb(153,0,76)",
+      "1.0": "rgb(126,0,35)"
+    }
+  }
+}
