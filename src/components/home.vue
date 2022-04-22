@@ -85,7 +85,7 @@
         <DrawPad v-if="timeAxisMode" class="need-shadow" style="position: absolute; left: 1048px; top: 850px; width: 1000px; height: 300px"></DrawPad>
 <!--      </div>-->
 <!--      <div id="images-row4" style="left: 1048px; top: 1680px; width: 800px; height: 400px">-->
-        <ImageGallery v-if="!timeAxisMode" class="need-shadow" ref="image-table" style="position: absolute; left: 1048px; top: 0px; width: 800px; height: 400px"></ImageGallery>
+        <ImageGallery v-if="!timeAxisMode" class="need-shadow" ref="image-table" style="position: absolute; left: 1048px; top: 0px; width: 800px; "></ImageGallery>
 <!--      </div>-->
 
     </el-row>
@@ -311,6 +311,7 @@ export default {
 
         const markerHtmlStyles = `
             background-color: ${myCustomColour};
+            opacity: 0.5;
             width: 3rem;
             height: 3rem;
             display: block;
@@ -347,17 +348,65 @@ export default {
     bus.$on("RenderAndShowSimilarDatesLooks", (json)=>{
       // debugger
       let tableData = []
-      let {distance, similar_pth, final_dist} = json
+      let {distance, similar_pth, final_dist, similar_pth_large} = json
       for(let i = 0; i < distance.length; ++i){
         tableData.push({
           'distance': json['distance'][i].toFixed(2),
           'similar_pth': json['similar_pth'][i],
+          'similar_pth_large': [],// 必须是数组，暂时设置为空 先渲染好再放上去
           'date': /\d+\-\d+\-\d+\-\d+/.exec(json['similar_pth'][i])
         })
       }
       this.$refs["time-brush"].finalDist = final_dist
       this.$refs["time-brush"].createTimeBrush()
-      this.$refs["image-table"].tableData = tableData
+
+      this.$refs["image-table"].tableData = tableData // 更新table
+      //预览图colorize
+      window.imgs = []; for(let i = 0; i < distance.length; ++i)window.imgs[i] = new Image()
+      for(let i = 0; i < distance.length; ++i){
+        let img = window.imgs[i]
+        // document.body.appendChild(img) // 图片加载正常
+        img.onload = async ()=>{
+          // debugger
+          let canvas = document.createElement('canvas')
+          canvas.width = canvas.height = 1024
+          let ctx = canvas.getContext('2d')
+          // 读取pixel， image load
+          ctx.drawImage(img, 0, 0)
+          let imgData = ctx.getImageData(0, 0, 1024, 1024)
+          let d = imgData.data
+          let counter = []; for(let t = 0; t < 256; ++t)counter[t] = 0;
+          for(let i = 0; i < d.length; i += 4){
+            counter[d[i]] += 1
+            d[i+3] = d[i] // 强度代表透明度
+            d[i] = d[i+1] = d[i+2] = 0
+          }
+          this.heatLayer.colorize(imgData.data)
+          // console.log(counter)
+          // ctx.clearRect(0,0,1024,1024)
+          // ctx.putImageData(await common.getMapContainer(), 0, 0) // 这是putImageData直接修改了底层数据，怪不得没有blend的效果，可能那样要调用drawImage api
+          let bg = await common.getMapContainer(), alpha, beta // background map
+          function clip(a, b, c){
+            return Math.min(Math.max(a, b), c)
+          }
+          for(let i = 0; i < d.length; i += 4){ // cpu大循环 又笨又慢 垃圾极了
+            alpha = d[i + 3] / 255
+            beta = 1 - alpha
+            d[i]   = clip(d[i]   * alpha + bg[i]   * beta, 0, 255)
+            d[i+1] = clip(d[i+1] * alpha + bg[i+1] * beta, 0, 255)
+            d[i+2] = clip(d[i+2] * alpha + bg[i+2] * beta, 0, 255)
+            d[i+3] = 255 // 一定要加上！！！ 细节太多了
+          }
+          ctx.putImageData(imgData, 0, 0)
+          // if(Math.random() < 0.2)
+          //   console.log(imgData)
+          let dataurl = canvas.toDataURL()
+          // 如何找到相应行set 直接修改数据 利于它的响应式？
+          this.$refs["image-table"].tableData[i]['similar_pth_large'] = [dataurl]
+        }
+        img.crossOrigin = 'anonymous'
+        img.src = similar_pth_large[i]
+      }
       // 预览图colorize
       // for(let i = 0; i < distance.length; ++i){
       //   var img = new Image()
@@ -393,7 +442,7 @@ export default {
     })
 
     // 添加一个queryLayer默认pather
-    this.queryLayer = new L.Pather()
+    // this.queryLayer = new L.Pather()
     // this.map.addLayer(this.queryLayer)
   },
   destroyed() {
@@ -617,6 +666,7 @@ export default {
       let mapConfig = common.getDatasetConfig('map')
       console.log('flying to new pos', common.currentDataset,[mapConfig['centerLat'], mapConfig['centerLng']], mapConfig['zoom'])
       this.currentDataset = common.getCurrentDataset()
+      this.markerGroup.clearLayers()
       this.map.flyTo([mapConfig['centerLat'], mapConfig['centerLng']], mapConfig['zoom'])
     }
   },
@@ -639,6 +689,9 @@ export default {
     },
     op: function (){
       common.setOp(this.op)
+    },
+    timeAxisMode: function (){
+      this.markerGroup.clearLayers()
     }
     // map: function(){
     //   //console.log(map)

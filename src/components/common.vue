@@ -12,6 +12,30 @@ let currentDate = {start: null, end: null}
 let currentDataset = 'aqi'
 let op = 'avg'
 let drawType = 'heat'
+let mapContainer = {}
+window.maps = mapContainer
+
+async function getMapContainer(){
+  if(mapContainer[currentDataset] !== undefined)
+    return mapContainer[currentDataset] // 返回一个uint8 array
+  // 这时候手动请求那玩意，然后在获取数组
+  var img = new Image()
+  img.src = datasetsConfig[currentDataset]['mapUrl']
+  img.crossOrigin = 'anonymous'
+  await new Promise((resolve, reject) => {
+    img.onload = function (){
+      let canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1024
+      let ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0)
+      let imgData = ctx.getImageData(0, 0, 1024, 1024)
+      mapContainer[currentDataset] = imgData.data
+      console.log('HELP ME!\n', {imgData})
+      resolve() // 当回调函数执行结束之后 promise满足条件，然后自然就同步了
+    }
+  })
+  return mapContainer[currentDataset]
+}
 
 function setCurrentDataset(dataset){
   // 对于全局变量，如果我们要修改以及使用的话，要注意使用getter setter方法，否则可能修改的只是个指针，而不是真实值！！类似python对实参修改
@@ -63,28 +87,21 @@ export default {
   op,
   drawType,
   colorTheme: [
-    "#1f77b4",
-    // "#aec7e8",
-    "#ff7f0e",
-    // "#ffbb78",
-    "#2ca02c",
-    // "#98df8a",
-    "#d62728",
-    // "#ff9896",
-    "#9467bd",
-    "#c5b0d5",
-    // "#1f77b4",
-    // "#aec7e8",
-    "#ff7f0e",
-    "#ffbb78",
-    "#2ca02c",
-    "#98df8a",
-    "#d62728",
-    "#ff9896",
-    "#9467bd",
-    "#c5b0d5"
+    "#63b2ee",
+    "#76da91",
+    "#f8cb7f",
+    "#f89588",
+    "#7cd6cf",
+    "#9192ab",
+    "#7898e1",
+    "#efa666",
+    "#eddd86",
+    "#9987ce",
+    "#63b2ee",
+    "#76da91"
   ],
 
+  getMapContainer,
   setCurrentDataset,
   getCurrentDataset,
   setCurrentDate,

@@ -31,9 +31,12 @@ export default {
         // console.log(this.map.latLngToContainerPoint(e.bounds._southWest))
         // console.log(e.bounds.toBBoxString()); // lon, lat, lon, lat
         //L.rectangle(e.bounds, { color: "blue", weight: 1 }).addTo(this.map);
-        if (this.lastRect)
-          this.map.removeLayer(this.lastRect)
-        this.lastRect = L.rectangle(e.bounds, { color: "blue", weight: 1 }).addTo(this.map);
+        // if (this.lastRect)
+        //   this.map.removeLayer(this.lastRect)
+        // this.lastRect = L.rectangle(e.bounds, { color: "blue", weight: 1 }).addTo(this.map);
+        this.$parent.markerGroup.clearLayers()
+        this.$parent.markerGroup.addLayer(L.rectangle(e.bounds, { color: "blue", weight: 1 }))
+
         this.map.dragging.disable()
         let a = this.map.latLngToContainerPoint(e.bounds._northEast), b = this.map.latLngToContainerPoint(e.bounds._southWest)
         let minx = Math.min(a.x, b.x), maxx = Math.max(a.x, b.x)
