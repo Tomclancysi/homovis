@@ -288,6 +288,12 @@ export default {
     },
     postProcessing(sigCanvas, pNum=896, vRange=255){// 最后要返回多少个采样点，我们说896个，然后平滑在通过NN，最后找相似的
       console.log('post', this.positions)
+      if (common.getCurrentDataset() == 'aqi')
+        pNum = 896
+      else if (common.getCurrentDataset() == 'covid')
+        pNum = 512
+
+
       let left = 1e9, right = 0, up = 0, bottom = 1e9;
       let h = sigCanvas.height;
       const p = this.positions;

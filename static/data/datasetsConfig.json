@@ -5,9 +5,9 @@
     "timeStart": {
       "year": 2017,
       "month": 3,
-      "day": 11,
+      "day": 14,
       "hour": 0,
-      "string": "2017-04-10T16:00:00.000Z"
+      "string": "2017-04-13T16:00:00.000Z"
     },
     "timeEnd": {
       "year": 2017,
@@ -30,8 +30,12 @@
       "0.60": "rgb(255,0,0)",
       "0.75": "rgb(153,0,76)",
       "1.0": "rgb(126,0,35)"
-    }
+    },
+    "mapUrl": "http://49.52.18.240:49158/dataset/mapcontainer/aqi.png"
   },
+
+
+
   "covid": {
     "name": "covid",
     "description": "month从零开始",
@@ -44,10 +48,10 @@
     },
     "timeEnd": {
       "year": 2022,
-      "month": 2,
-      "day": 30,
-      "hour": 24,
-      "string": "2022-03-29T16:00:00.000Z"
+      "month": 3,
+      "day": 17,
+      "hour": 22,
+      "string": "2022-04-17T14:00:00.000Z"
     },
     "interval": "2 hour",
     "type": "heatmap",
@@ -63,8 +67,13 @@
       "0.60": "rgb(255,0,0)",
       "0.75": "rgb(153,0,76)",
       "1.0": "rgb(126,0,35)"
-    }
+    },
+    "mapUrl": "http://49.52.18.240:49158/dataset/mapcontainer/covid.png"
   },
+
+
+
+
   "nightlight": {
     "name": "nightlight",
     "description": "北京",
@@ -96,6 +105,7 @@
       "0.60": "rgb(255,0,0)",
       "0.75": "rgb(153,0,76)",
       "1.0": "rgb(126,0,35)"
-    }
+    },
+    "mapUrl": "http://49.52.18.240:49158/dataset/mapcontainer/covid.png"
   }
 }

@@ -122,7 +122,7 @@ export default {
   },
   queryTimeLineSimilar(){
     // 这里需要用post请求
-    return `/query/api/findsimilarline?dataset=${this.currentDataset}`
+    return `/query/api/findsimilarline?dataset=${getCurrentDataset()}`
   },
   dateFormatter, // 格式化str
 

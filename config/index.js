@@ -18,10 +18,15 @@ module.exports = {
           '^/query': '/'
         }
       },
-      // '/static':{
-      //
-      // }
+      '/static':{
+        target: 'http://49.52.18.240:49158/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/static': '/'
+        }
+      }
     },
+
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST

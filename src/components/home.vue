@@ -30,11 +30,11 @@
 <!--      </el-col>-->
 
       <el-col :span="3">
-        <el-tag type="success">经度： {{this.lng.toFixed(2)}}</el-tag>
-        <el-tag type="success">纬度： {{this.lat.toFixed(2)}}</el-tag>
+        <el-tag type="success">lng:{{this.lng.toFixed(2)}}</el-tag>
+        <el-tag type="success">lat:{{this.lat.toFixed(2)}}</el-tag>
       </el-col>
       <el-col :span="3" class="current-date-range">
-        <el-tag type="success">日期：{{this.currentDate.start == this.currentDate.end ? this.currentDate.start : `${this.currentDate.start} to ${this.currentDate.end}`}}</el-tag>
+        <el-tag type="success">Date: {{this.currentDate.start == this.currentDate.end ? this.currentDate.start : `${this.currentDate.start} to ${this.currentDate.end}`}}</el-tag>
       </el-col>
       <el-col :span="3">
         <span class="label">Mode</span>
