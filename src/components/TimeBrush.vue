@@ -23,18 +23,23 @@ export default {
       // let cfg = require(`../../static/data/aqi/datasetConfig.json`)
       let height = 120, width = 1024
       let margin = ({top: 10, right: 0, bottom: 20, left: 0}) // svg的边缘，真正用来选取的区域是在里面
-      let inter = common.getDatasetConfig("interval"), interval
+      let inter = common.getDatasetConfig("interval"), interval, tickInterval
+      // let tickInterval = d3.timeWeek.every(1) // tick的间隔
       if(inter.endsWith('hour')){
         interval = d3.timeHour.every(parseInt(inter.substr(0, inter.indexOf(' ')))) // 相邻两帧的时间间隔
+        tickInterval = d3.timeWeek.every(1)
       }
       else if(inter.endsWith('day')){
         interval = d3.timeDay.every(parseInt(inter.substr(0, inter.indexOf(' ')))) // 相邻两帧的时间间隔
+        tickInterval = d3.timeMonth.every(3) // tick的间隔
       }
       else if(inter.endsWith('month')){
         interval = d3.timeMonth.every(parseInt(inter.substr(0, inter.indexOf(' ')))) // 相邻两帧的时间间隔
+        tickInterval = d3.timeYear.every(1) // tick的间隔
       }
 
-      let tickInterval = d3.timeWeek.every(1) // tick的间隔
+      // let tickInterval = d3.timeWeek.every(1) // tick的间隔
+
       let svg = d3.select('#brush')
         .append('svg')
         .attr('width', `${width}px`)
@@ -57,7 +62,7 @@ export default {
             .attr("stroke-opacity", d => d <= d3.timeWeek(d) ? 1 : 0.5)))
         .call(g => g.append("g")
           .call(d3.axisBottom(x)
-            .ticks(d3.timeWeek)
+            .ticks(tickInterval)
             .tickPadding(0))
           .attr("text-anchor", null)
           .call(g => g.select(".domain").remove())
@@ -185,7 +190,7 @@ export default {
         let xDomain = [0, d.length];
         let yDomain = [0, d3.max(d)];
         let xRange = [0, width]
-        let yRange = [margin.top, height - margin.bottom]
+        let yRange = [height - margin.bottom, margin.top]
         const xScale = d3.scaleLinear(xDomain, xRange);
         const yScale = d3.scaleLinear(yDomain, yRange);
         // Construct a line generator.
@@ -197,7 +202,7 @@ export default {
         // 真正画折线图的时候
         svg.append("path")
           .attr("fill", "none")
-          .attr("stroke", "blue")
+          .attr("stroke", "#802A2A")
           .attr("stroke-width", 1.5)
           .attr("stroke-linecap", "round")
           .attr("stroke-linejoin", "round")

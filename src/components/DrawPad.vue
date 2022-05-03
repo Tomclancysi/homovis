@@ -292,7 +292,8 @@ export default {
         pNum = 896
       else if (common.getCurrentDataset() == 'covid')
         pNum = 512
-
+      else if (common.getCurrentDataset() == 'nightlight')
+        pNum = 608
 
       let left = 1e9, right = 0, up = 0, bottom = 1e9;
       let h = sigCanvas.height;

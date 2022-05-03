@@ -31,7 +31,7 @@
       "0.75": "rgb(153,0,76)",
       "1.0": "rgb(126,0,35)"
     },
-    "mapUrl": "http://49.52.18.240:49158/dataset/mapcontainer/aqi.png"
+    "mapUrl": "/static/dataset/mapcontainer/aqi.png"
   },
 
 
@@ -68,35 +68,33 @@
       "0.75": "rgb(153,0,76)",
       "1.0": "rgb(126,0,35)"
     },
-    "mapUrl": "http://49.52.18.240:49158/dataset/mapcontainer/covid.png"
+    "mapUrl": "/static/dataset/mapcontainer/covid.png"
   },
-
-
 
 
   "nightlight": {
     "name": "nightlight",
     "description": "北京",
     "timeStart": {
-      "year": 2022,
-      "month": 2,
-      "day": 6,
+      "year": 2020,
+      "month": 0,
+      "day": 1,
       "hour": 0,
-      "string": "2022-03-05T16:00:00.000Z"
+      "string": "2019-12-31T16:00:00.000Z"
     },
     "timeEnd": {
-      "year": 2022,
-      "month": 2,
-      "day": 30,
-      "hour": 24,
-      "string": "2022-03-29T16:00:00.000Z"
+      "year": 2021,
+      "month": 7,
+      "day": 31,
+      "hour": 0,
+      "string": "2021-08-30T16:00:00.000Z"
     },
-    "interval": "2 hour",
+    "interval": "1 day",
     "type": "heatmap",
     "map": {
-      "centerLat": 31.119880243,
-      "centerLng": 121.391788947,
-      "zoom": 10
+      "centerLat": 39.92656,
+      "centerLng": 116.38655,
+      "zoom": 11
     },
     "colormap": {
       "0.15": "rgb(1,228,0)",
@@ -106,6 +104,6 @@
       "0.75": "rgb(153,0,76)",
       "1.0": "rgb(126,0,35)"
     },
-    "mapUrl": "http://49.52.18.240:49158/dataset/mapcontainer/covid.png"
+    "mapUrl": "/static/dataset/mapcontainer/nightlight.png"
   }
 }

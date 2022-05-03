@@ -363,6 +363,33 @@ export default {
       this.$refs["image-table"].tableData = tableData // 更新table
       //预览图colorize
       window.imgs = []; for(let i = 0; i < distance.length; ++i)window.imgs[i] = new Image()
+      window.imgs1 = []; for(let i = 0; i < distance.length; ++i)window.imgs1[i] = new Image()
+      for(let i = 0; i < distance.length; ++i){
+        let img = window.imgs1[i]
+        img.onload = async ()=>{
+          // debugger
+          let canvas = document.createElement('canvas')
+          canvas.width = canvas.height = img.width
+          let ctx = canvas.getContext('2d')
+          ctx.drawImage(img, 0, 0)
+          let imgData = ctx.getImageData(0, 0, 1024, 1024)
+          let d = imgData.data
+          for(let i = 0; i < d.length; i += 4){
+            d[i+3] = d[i] // 强度代表透明度
+            d[i] = d[i+1] = d[i+2] = 0
+          }
+          this.heatLayer.colorize(imgData.data)
+
+          ctx.putImageData(imgData, 0, 0)
+          // if(Math.random() < 0.2)
+          //   console.log(imgData)
+          let dataurl = canvas.toDataURL()
+          // 如何找到相应行set 直接修改数据 利于它的响应式？
+          this.$refs["image-table"].tableData[i]['similar_pth'] = dataurl
+        }
+        img.crossOrigin = 'anonymous'
+        img.src = similar_pth[i]
+      }
       for(let i = 0; i < distance.length; ++i){
         let img = window.imgs[i]
         // document.body.appendChild(img) // 图片加载正常
@@ -690,8 +717,20 @@ export default {
     op: function (){
       common.setOp(this.op)
     },
-    timeAxisMode: function (){
+    timeAxisMode: function (newVal){
       this.markerGroup.clearLayers()
+      if(newVal){
+        this.queryLayer = new L.Pather({
+          smoothFactor: 10,
+          pathWidth: 3,
+          strokeColour: "#f00"
+        })
+        this.map.addLayer(this.queryLayer)
+      }
+      else{
+        if(this.queryLayer !== undefined)
+          this.map.removeLayer(this.queryLayer)
+      }
     }
     // map: function(){
     //   //console.log(map)
