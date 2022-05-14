@@ -243,8 +243,11 @@ export default {
     h = Number(h.substr(0, h.length-2))
     this.width = w
     this.height = h
+    // 有选择的加？
     this.$el.addEventListener("mousemove", this.mouseMoveHandle)
-    // this.$refs.testdiv.appendChild(this.draw())
+    // 还是列一个图例，然后鼠标hover的时候，触发
+
+
   },
 
   // watch: {

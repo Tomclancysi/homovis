@@ -9,9 +9,6 @@ import bus from "../assets/bus";
 
 export default {
   name: "RectSelector",
-  data: {
-    lastRect: null
-  },
   props: {
     map: {
       required: true
@@ -37,13 +34,11 @@ export default {
         this.$parent.markerGroup.clearLayers()
         this.$parent.markerGroup.addLayer(L.rectangle(e.bounds, { color: "blue", weight: 1 }))
 
-        this.map.dragging.disable()
+        // this.map.dragging.disable()
         let a = this.map.latLngToContainerPoint(e.bounds._northEast), b = this.map.latLngToContainerPoint(e.bounds._southWest)
         let minx = Math.min(a.x, b.x), maxx = Math.max(a.x, b.x)
         let miny = Math.min(a.y, b.y), maxy = Math.max(a.y, b.y)
         this.query(minx, maxx, miny, maxy)
-        // TODO 拿到像素位置
-          //  去请求api，得到相似的天数，然后在合适的方式展示出来
       })
     },
 
@@ -54,48 +49,42 @@ export default {
      * @returns {Promise<void>}
      */
     async query(minx, maxx, miny, maxy){
-      minx = parseInt(minx / 1024 * 64);
-      miny = parseInt(miny / 1024 * 64);
-      maxx = parseInt(maxx / 1024 * 64);
-      maxy = parseInt(maxy / 1024 * 64);
-      // TODO 日期从哪里来，原来直接是找到这个ToolTip，组件化后，这应该作为一个参数传进来？
-      // let reqUrl = `http://49.52.18.240:49159/requestrect?start_date=${st}&end_date=${ed}&minx=${minx}`
-      //   + `&miny=${miny}&maxx=${maxx}&maxy=${maxy}`;
-      let reqUrl = common.queryRectAreaSimilar(minx, maxx, miny, maxy)
-      // debugger
-      let response = await fetch(reqUrl,{ // 这玩意老报错，是不是跨域的问题
-        method: 'GET',
-        mode: 'cors' //这是支持跨域
-      });
-      if (!response.ok){
-        console.log(`no response when get ${reqUrl}`);
-        return;
+      debugger
+      if(this.$parent.timeAxisMode){
+        // 这里查找聚类的结果
+        let reqUrl = common.queryRegionCluster(minx, maxx, miny, maxy)
+        this.$axios.get(reqUrl)
+          .then((response)=>{
+            console.log('QueryRegionCluster:', response)
+          })
+          .catch(function (error) { // handle error
+            console.log(error);
+          })
       }
+      else{
+        minx = parseInt(minx / 1024 * 64);
+        miny = parseInt(miny / 1024 * 64);
+        maxx = parseInt(maxx / 1024 * 64);
+        maxy = parseInt(maxy / 1024 * 64);
+        let reqUrl = common.queryRectAreaSimilar(minx, maxx, miny, maxy)
+        let response = await fetch(reqUrl,{ // 这玩意老报错，是不是跨域的问题
+          method: 'GET',
+          mode: 'cors' //这是支持跨域
+        });
+        if (!response.ok){
+          console.log(`no response when get ${reqUrl}`);
+          return;
+        }
+        response.json().then(json =>{
+          bus.$emit("RenderAndShowSimilarDatesLooks", json)
+        })
+      }
+    },
 
-      // TODO 这里应当合适的方式展示出来
-      response.json().then(json =>{
-        console.log(json)
-        bus.$emit("RenderAndShowSimilarDatesLooks", json)
-      })
-      // response.json().then((data)=>{
-      //   for(let i = 0; i < data['similar_pth'].length; ++i){
-      //     var image = new Image();
-      //     image.onload = function () {
-      //       document.getElementById(`${i+1}nd`).setAttribute('src', this.src);
-      //     };
-      //     image.src = data['similar_pth'][i];
-      //     let name = data['similar_pth'][i];
-      //     let j = name.length - 1;
-      //     while (name[j] != '/') j--;
-      //     name = name.substr(j+1);
-      //     name = name.substr(0, name.length - 4)
-      //     let ele = document.getElementById(`${i+1}nd label`);
-      //     ele.innerText = name;
-      //     let s = data['similar_pth'][i];
-      //     s = CommonDefine.getArg('DATA_PATH_HEATMAP') + s.substr(s.lastIndexOf('/') + 1);
-      //     ele.setAttribute('link', s);
-      //   }
-      // });
+    RegionClusterHandler(response){
+      let json = response.data
+      // 这里应该是聚类后的结果
+
     }
   },
   // watch:{
@@ -120,10 +109,11 @@ export default {
   //   }
   // },
   mounted() {
-
+    this.setMap(map)
   },
   destroyed() {
     this.map.selectArea.setValidate(); // 可能是取消绑定事件？
+    this.map.off('areaselected')
   }
 }
 </script>

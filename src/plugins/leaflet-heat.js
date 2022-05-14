@@ -52,12 +52,23 @@
       for (var a, s = 0, e = this._data.length; e > s; s++) a = this._data[s], i.globalAlpha = Math.max(a[2] / this._max, t || .05), i.drawImage(this._circle, a[0] - this._r, a[1] - this._r);
       var n = i.getImageData(0, 0, this._width, this._height);
       // n就是我们要记录的灰度值，so 做一点非常无脑的事情 直接将其保存下来吧, 这里第四位表示幅度值
-      let l = n.data.length / 4
-      window.globaln = new Array(l)
-      for (let idx = 0; idx < l; ++idx)
-        window.globaln[idx] = n.data[idx*4 + 3]
+      // let l = n.data.length / 4
+      // window.globaln = new Array(l)
+      // for (let idx = 0; idx < l; ++idx)
+      //   window.globaln[idx] = n.data[idx*4 + 3]
       // createElements()
       // document.body.appendChild()
+      if(window.generatingHeatMap){
+        let cvs = document.createElement("canvas")
+        cvs.width = this._width
+        cvs.height = this._height
+        let ctx = cvs.getContext('2d')
+        for (let i = 0; i < n.length; i += 4){
+          n[i] = n[i+1] = n[i+2] = n[i+3]
+        }
+        ctx.putImageData(n, 0, 0)
+        window.imgData = cvs.toDataURL()
+      }
       return this._colorize(n.data, this._grad), i.putImageData(n, 0, 0), this
     },
     changeGrayData: function (imgData){

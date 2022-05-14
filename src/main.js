@@ -18,9 +18,9 @@ Vue.config.productionTip = false
 Vue.prototype.$mapboxgl = mapBoxGl
 Vue.prototype.$map = { _leaflet_id: -1 }
 
-Vue.L = Vue.prototype.$L = L
+window.L = Vue.L = Vue.prototype.$L = L
 
-Vue.prototype.$axios = Axios
+window.axios = Vue.prototype.$axios = Axios
 
 /* eslint-disable no-new */
 new Vue({

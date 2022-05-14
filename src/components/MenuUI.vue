@@ -1,7 +1,6 @@
 <template>
 <div id="menu">
   <el-menu
-    :default-active="activeIndex2"
     class="el-menu-demo"
     mode="horizontal"
     @select="handleSelect"
@@ -16,10 +15,10 @@
 
     </el-submenu>
     <el-submenu index="3">
-      <template slot="title">DrawMethod</template>
-      <el-menu-item index="3-1">heatmap</el-menu-item>
-      <el-menu-item index="3-2">pointmap</el-menu-item>
-      <el-menu-item index="3-3">bubulemap</el-menu-item>
+      <template slot="title">QueryMethod</template>
+      <el-menu-item index="3-1">QueryArea</el-menu-item>
+      <el-menu-item index="3-2">QueryCurve</el-menu-item>
+<!--      <el-menu-item index="3-3">bubulemap</el-menu-item>-->
     </el-submenu>
 <!--    <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>-->
   </el-menu>
@@ -35,7 +34,7 @@ export default {
   data(){
     return {
       lastDataset: null,
-      lastDrawMethod: null,
+      column3: ['QueryArea', 'QueryCurve'],
       datasetNames: common.datasetNames // 灵异事件 我直接data: {}这还不行，必须用函数？
     }
   },
@@ -48,22 +47,18 @@ export default {
     handleSelect(key, keyPath) {
       console.log(key, keyPath);
       let path = keyPath[keyPath.length - 1]
-      let choice = path[path.length-1]
+      let choice = parseInt(path[path.length-1]) - 1 // 0, 1, 2
       if (key[0] == '2'){// dataset changed
         if(this.lastDataset == choice)
           return;
         this.lastDataset = choice
         // 更换数据集后，可能多个地方需要相应，所以放到bus上
-        let newDataset = this.datasetNames[parseInt(choice)-1]
+        let newDataset = this.datasetNames[choice]
         common.setCurrentDataset(newDataset)
         bus.$emit('ChangeDataset', newDataset)
       }
       else if(key[0] == '3'){// draw method changed
-        if(this.lastDrawMethod == choice)
-          return;
-        this.lastDrawMethod = choice
-        //TODO 更换新的绘制方法后，使用这个方法重新绘制数据
-
+        this.$parent.queryLayer = this.column3[choice]
       }
 
     }

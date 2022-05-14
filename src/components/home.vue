@@ -3,32 +3,6 @@
 <!--左边是2个框-->
     <MenuUI></MenuUI>
     <el-row :gutter="20" class="row1">
-<!--      <el-col :span="6" style="padding: 4px">-->
-<!--      <div style="text-align: center;margin-top: 5%;margin-bottom: 5%">-->
-<!--        <el-select v-model="currentDate" @change="dateChange" size="large">-->
-<!--          <el-option-->
-<!--            v-for="(item,index) in dateSet"-->
-<!--            :key="index"-->
-<!--            :label="item.toString()"-->
-<!--            :value="item">-->
-<!--          </el-option>-->
-<!--        </el-select>-->
-<!--      </div>-->
-<!--    </el-col>-->
-
-<!--    <el-col :span="6" style="padding: 4px">-->
-<!--      <div style="text-align: center;margin-bottom: 5%;margin-bottom: 5%">-->
-<!--        <el-select v-model="currentType" @change="typeChange" size="large">-->
-<!--          <el-option-->
-<!--            v-for="(item,index) in typeSet"-->
-<!--            :key="index"-->
-<!--            :label="item.toString()"-->
-<!--            :value="item">-->
-<!--          </el-option>-->
-<!--        </el-select>-->
-<!--      </div>-->
-<!--      </el-col>-->
-
       <el-col :span="3">
         <el-tag type="success">lng:{{this.lng.toFixed(2)}}</el-tag>
         <el-tag type="success">lat:{{this.lat.toFixed(2)}}</el-tag>
@@ -54,26 +28,6 @@
           <div id="map" style="width: 100%;height: 100%" ref="main-map"></div>
         </div>
       </el-col>
-      <!--在地图的右边就是几个量表了-->
-<!--      <el-col v-if="this.timeAxisMode" :span="12">-->
-<!--        &lt;!&ndash;第一行做什么&ndash;&gt;-->
-<!--        <el-row :gutter="20" style="width: 500px; height: 200px">-->
-<!--          <LineChart  :shown-data="this.testData" ref="line-chart">line chart1</LineChart>-->
-<!--        </el-row>-->
-<!--        &lt;!&ndash;第二行做什么&ndash;&gt;-->
-<!--        &lt;!&ndash;在这个地方设置宽度高度是否有意义？？？&ndash;&gt;-->
-<!--        <el-row style="width: 500px; height: 200px">-->
-<!--          <AxisBubble ref="axis-bubble"></AxisBubble>-->
-<!--        </el-row>-->
-
-<!--        <el-row :gutter="20" style="width: 500px; height: 200px">-->
-<!--          <DrawPad></DrawPad>-->
-<!--        </el-row>-->
-
-<!--        <el-row>-->
-<!--          <ImageGallery ref="image-table" style="width: 500px"></ImageGallery>-->
-<!--        </el-row>-->
-<!--      </el-col>-->
 
 <!--      <div id="line-chart-row1" style="position: absolute; left: 1048px; top: 0px; width: 800px; height: 600px">-->
         <LineChart v-if="timeAxisMode" class="need-shadow" :shown-data="this.testData" ref="line-chart" style="position: absolute; left: 1048px; top: 0px; width: 1000px; height: 430px">line chart1</LineChart>
@@ -124,12 +78,14 @@
             <span class="demonstration">brush size of heatmap</span>
             <el-slider v-model="brushSize"></el-slider>
           </div>
+          <el-button type="primary" :disabled="this.disabled" :loading="this.generatingData" @click.native="generateHeatMap()">{{this.generatingData?'Loading':'GenerateHeatMap'}}</el-button>
         </div>
 <!--      </el-col>-->
 <!--    </el-row>-->
 <!--    <el-row>-->
 <!--      <el-col :span="6">-->
-      <RectSelector :map="this.map" ref="rect-selector">test</RectSelector>
+      <CurveQuery v-if="this.queryLayer == 'QueryCurve'" :map="this.map"></CurveQuery>
+      <RectSelector v-else-if="this.queryLayer == 'QueryArea'" :map="this.map" ref="rect-selector"></RectSelector>
 <!--      </el-col>-->
 <!--    </el-row>-->
   </div>
@@ -143,7 +99,7 @@ window.d3 = d3
 import "@asymmetrik/leaflet-d3";
 import '../plugins/leaflet-heat'
 require("leaflet-pather")
-import axios from "axios"
+
 
 import common from "./common";
 import TimeBrush from "./TimeBrush";
@@ -154,7 +110,9 @@ import MenuUI from "./MenuUI";
 import DrawPad from "./DrawPad";
 import AxisBubble from "./AxisBubble";
 import ImageGallery from "./ImageGallery";
-
+import CurveQuery from "./CurveQuery";
+import JSZip from "jszip";
+import {saveAs} from 'file-saver'
 
 
 export default {
@@ -181,12 +139,14 @@ export default {
       drawType: 'heat',
       brushSize: 25,
 
-      queryLayer: null
+      queryLayer: null,
+
+      generatingData: false,
     }
   },
   computed: {
     disabled: function() {
-      if(this.currentDataset === 'aqi') // 目前aqi没有原始数据
+      if(this.currentDataset !== 'covid') // 目前aqi没有原始数据
         return true
       return false
     }
@@ -196,7 +156,7 @@ export default {
   },
   mounted() {
     this.createMap()
-    this.$refs["rect-selector"].setMap(this.map)
+    // this.$refs["rect-selector"].setMap(this.map)
     this.loadData()
     //this.draw(this.currentDate,this.currentType)
     // 测试bubble map用的
@@ -247,8 +207,8 @@ export default {
       console.log(this.currentDate)
       //请求图片更换热力图 底图！
       let url = common.queryDateRange(date)
-      axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
-      axios.get(url).then(json => {
+      this.$axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*'
+      this.$axios.get(url).then(json => {
         console.log(json)
         let heatLayer = this.heatLayer
         let data = json.data // 包含 url status similar path
@@ -298,9 +258,6 @@ export default {
 
     // 更改时序曲线的展示方式
     bus.$on("WhoCanShowThis", (json)=>{
-      let K = Object.keys(json)
-      // let d0 = json[K[0]]
-
       // 在地图上添加marker
       let idx = 0
       this.markerGroup.clearLayers()
@@ -342,6 +299,15 @@ export default {
 
       this.$refs["line-chart"].shownData = json
       this.$refs["line-chart"].draw()
+    })
+
+    bus.$on('PutToAxisBubble', (json)=>{
+      if(this.$refs["axis-bubble"]) {
+        let st = new Date(common.getDatasetConfig('timeStart')['string'])
+        let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
+        this.$refs["axis-bubble"].setData(json, [st, ed])
+        this.$refs["axis-bubble"].draw()
+      }
     })
 
     // 用heatmap渲染一下小图，然后交给table展示
@@ -477,8 +443,41 @@ export default {
     bus.$off('UpdateDate')
     bus.$off('WhoCanShowThis')
     bus.$off("RenderAndShowSimilarDatesLooks")
+    bus.$off('PutToAxisBubble')
   },
   methods:{
+    generateHeatMap(){
+      console.log('[Generate HeatMap]:', this.dateSet)
+      window.generatingHeatMap = this.generatingData = true
+      var zip = new JSZip()
+      let colormap = common.getDatasetConfig('colormap')
+      let newcolormap = {}
+      let keys = Object.keys(colormap)
+      for(let i = 0; i < keys.length; ++i) {
+        newcolormap[Number(keys[i])] = colormap[keys[i]]
+      }
+      // test
+      let idx = 0
+      for(let key of this.dateSet){
+        // if(idx++)break;
+        let heatLayer = L.heatLayer(
+          this.data[key],
+          {
+            radius: this.brushSize || 25,
+            gradient:newcolormap,
+            max: 0.2,
+          }
+        ).addTo(this.map);
+        zip.file(`${key}.png`, window.imgData.substr(22), {base64: true})
+        this.map.removeLayer(heatLayer)
+      }
+      zip.generateAsync({type:"blob"})
+        .then(function(content) {
+          // see FileSaver.js
+          saveAs(content, "dataset.zip");
+        });
+      window.generatingHeatMap = this.generatingData = false
+    },
     dateChange(val){
       this.currentDate=val
       //this.map.remove() // 直接删掉地图对象换新的了。。应该是删掉上面的数据图层罢
@@ -666,27 +665,14 @@ export default {
           data,
           {
             radius: this.brushSize || 25,
-            // gradient:{0.2: tempColor[0], 0.4: tempColor[1],
-            //   0.6: tempColor[2], 0.8: tempColor[3], 1: tempColor[4]},
             gradient:newcolormap,
             max: 0.2,
             // blur: 20,
           }
-        )//.addTo(this.map);
+        )
         dataLayerGroup.addLayer(heatLayer)
         window.heatLayer = heatLayer
         this.heatLayer = heatLayer
-        // console.log({heatLayer})
-
-        // 不能在canvas中取图像，而是直接在heat leaf中去取，这个不行
-        // var canvasEl = document.getElementsByClassName("leaflet-heatmap-layer")[0]
-        // var dataurl = canvasEl.toDataURL()
-        // window.downloadres[date] = dataurl
-        // 为了能下载数据搞的愚蠢的代码
-        // if(window.downloadres == undefined){
-        //   window.downloadres = {}
-        // }
-        // window.downloadres[date] = window.globaln
       }
     },
     flyTo(){
@@ -698,6 +684,7 @@ export default {
     }
   },
   components:{
+    CurveQuery,
     ImageGallery,
     AxisBubble,
     DrawPad,
@@ -719,6 +706,7 @@ export default {
     },
     timeAxisMode: function (newVal){
       this.markerGroup.clearLayers()
+      /*
       if(newVal){
         this.queryLayer = new L.Pather({
           smoothFactor: 10,
@@ -731,11 +719,8 @@ export default {
         if(this.queryLayer !== undefined)
           this.map.removeLayer(this.queryLayer)
       }
+      */
     }
-    // map: function(){
-    //   //console.log(map)
-    //   console.log('map changed')
-    // }
   }
 }
 </script>

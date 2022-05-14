@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 // 定义全局变量和方法
 let datasetsConfig = require('../../static/data/datasetsConfig.json')
 let datasetNames = Object.keys(datasetsConfig)
@@ -78,6 +80,7 @@ let dateFormatter = (date)=>{
   return `${y}-${m}-${d}-${h}`
 }
 
+
 export default {
   name: "common",
   currentDataset, // 当前数据集
@@ -123,6 +126,12 @@ export default {
   queryTimeLineSimilar(){
     // 这里需要用post请求
     return `/query/api/findsimilarline?dataset=${getCurrentDataset()}`
+  },
+  queryRegionCluster(minx, maxx, miny, maxy){
+    return `/query/api/regioncluster?minx=${minx}&miny=${miny}&maxx=${maxx}&maxy=${maxy}&dataset=${getCurrentDataset()}`
+  },
+  queryTimelineOfPoint(){
+    return `/query/api/timelineofpoint?dataset=${getCurrentDataset()}`
   },
   dateFormatter, // 格式化str
 
