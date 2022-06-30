@@ -4,6 +4,7 @@
 
 <script>
 import axios from 'axios'
+import * as d3 from "d3";
 
 // 定义全局变量和方法
 let datasetsConfig = require('../../static/data/datasetsConfig.json')
@@ -16,6 +17,9 @@ let op = 'avg'
 let drawType = 'heat'
 let mapContainer = {}
 window.maps = mapContainer
+
+const atSamePosition = 1
+const atDiffPosition = 2
 
 async function getMapContainer(){
   if(mapContainer[currentDataset] !== undefined)
@@ -32,7 +36,7 @@ async function getMapContainer(){
       ctx.drawImage(img, 0, 0)
       let imgData = ctx.getImageData(0, 0, 1024, 1024)
       mapContainer[currentDataset] = imgData.data
-      console.log('HELP ME!\n', {imgData})
+      // console.log('HELP ME!\n', {imgData})
       resolve() // 当回调函数执行结束之后 promise满足条件，然后自然就同步了
     }
   })
@@ -89,6 +93,9 @@ export default {
   currentDate, // 每次修改的时候修改其成员0 1，而不是替换成新的数组
   op,
   drawType,
+  atSamePosition,
+  atDiffPosition,
+
   colorTheme: [
     "#63b2ee",
     "#76da91",
@@ -123,6 +130,12 @@ export default {
     return `/query/requestrect?start_date=${date.start}&end_date=${date.end}&minx=${minx}` +
            `&miny=${miny}&maxx=${maxx}&maxy=${maxy}&dataset=${getCurrentDataset()}`;
   },
+  queryTemplateMatch(minx, maxx, miny, maxy){
+    let date = getCurrentDate()// 返回所有的匹配位置，它的时间和空间
+    return `/query/templatematch?start_date=${date.start}&end_date=${date.end}&minx=${minx}` +
+      `&miny=${miny}&maxx=${maxx}&maxy=${maxy}&dataset=${getCurrentDataset()}`;
+  },
+
   queryTimeLineSimilar(){
     // 这里需要用post请求
     return `/query/api/findsimilarline?dataset=${getCurrentDataset()}`
@@ -144,6 +157,27 @@ export default {
       throw new Error(`dataset property ${opt} is not defined`)
     }
   },
+  getTimeRange(){
+    let st = new Date(this.getDatasetConfig('timeStart')['string'])
+    let ed = new Date(this.getDatasetConfig('timeEnd')['string'])
+    return [st, ed];
+  },
+  getInterval(){
+    let inter = this.getDatasetConfig("interval"), interval, tickInterval
+    if(inter.endsWith('hour')){
+      interval = d3.timeHour.every(parseInt(inter.substr(0, inter.indexOf(' ')))) // 相邻两帧的时间间隔
+      // tickInterval = d3.timeWeek.every(1)
+    }
+    else if(inter.endsWith('day')){
+      interval = d3.timeDay.every(parseInt(inter.substr(0, inter.indexOf(' ')))) // 相邻两帧的时间间隔
+      // tickInterval = d3.timeMonth.every(3) // tick的间隔
+    }
+    else if(inter.endsWith('month')){
+      interval = d3.timeMonth.every(parseInt(inter.substr(0, inter.indexOf(' ')))) // 相邻两帧的时间间隔
+      // tickInterval = d3.timeYear.every(1) // tick的间隔
+    }
+    return interval
+  }
 }
 </script>
 

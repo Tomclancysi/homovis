@@ -12,12 +12,15 @@ export default {
   props: {
     map: {
       required: true
+    },
+    mode: {
+      default: common.atSamePosition // 1 代表在相同位置， 2 代表在不同位置进行模板匹配
     }
   },
   methods: {
     setMap(map){
       this.map = map
-      console.log('change map')
+      console.log('[rect selector is set down with current map!]')
       this.map.selectArea.enable();
       //this.map.selectArea.setAutoDisable(true)
       // 绑定事件处理
@@ -49,13 +52,17 @@ export default {
      * @returns {Promise<void>}
      */
     async query(minx, maxx, miny, maxy){
-      debugger
+      // debugger
       if(this.$parent.timeAxisMode){
         // 这里查找聚类的结果
         let reqUrl = common.queryRegionCluster(minx, maxx, miny, maxy)
         this.$axios.get(reqUrl)
           .then((response)=>{
             console.log('QueryRegionCluster:', response)
+            let json = response.data
+            if(json['status'] == 'success'){
+              bus.$emit("PutToAxisBubble", json['trends'])
+            }
           })
           .catch(function (error) { // handle error
             console.log(error);
@@ -66,7 +73,15 @@ export default {
         miny = parseInt(miny / 1024 * 64);
         maxx = parseInt(maxx / 1024 * 64);
         maxy = parseInt(maxy / 1024 * 64);
-        let reqUrl = common.queryRectAreaSimilar(minx, maxx, miny, maxy)
+        let reqUrl
+        if(this.mode == common.atSamePosition) {
+          reqUrl = common.queryRectAreaSimilar(minx, maxx, miny, maxy)
+          console.log('[RectSelector] requesting for similar pattern in the same position...')
+        }
+        else {
+          reqUrl = common.queryTemplateMatch(minx, maxx, miny, maxy)
+          console.log('[RectSelector] requesting for similar pattern in different position...')
+        }
         let response = await fetch(reqUrl,{ // 这玩意老报错，是不是跨域的问题
           method: 'GET',
           mode: 'cors' //这是支持跨域
@@ -76,6 +91,10 @@ export default {
           return;
         }
         response.json().then(json =>{
+          if(json['status']!='success'){
+            console.log('[RectSelector] Error in server side')
+            return
+          }
           bus.$emit("RenderAndShowSimilarDatesLooks", json)
         })
       }

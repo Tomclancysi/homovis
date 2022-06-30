@@ -60,7 +60,8 @@ export default {
       this.lastLine = polyline
 
       polyline.edges.forEach((edge, i)=>{
-        edge.bindTooltip(`${i}`, {
+        let s = String(i+1)
+        edge.bindTooltip(s, {
           permanent: true
         })
       })

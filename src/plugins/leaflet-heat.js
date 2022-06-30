@@ -63,8 +63,10 @@
         cvs.width = this._width
         cvs.height = this._height
         let ctx = cvs.getContext('2d')
-        for (let i = 0; i < n.length; i += 4){
-          n[i] = n[i+1] = n[i+2] = n[i+3]
+        let d = n.data
+        for (let i = 0; i < d.length; i += 4){
+          d[i] = d[i+1] = d[i+2] = d[i+3]
+          d[i+3] = 255
         }
         ctx.putImageData(n, 0, 0)
         window.imgData = cvs.toDataURL()

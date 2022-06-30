@@ -39,7 +39,7 @@ export default {
 
       //首先，绘制下面的坐标轴
       let margin = {
-        left:5,
+        left:20,
         right:5,
         top:5,
         bottom:20
@@ -50,14 +50,14 @@ export default {
 
       //然后，绘制圆形在坐标轴上
       // 循环几次key 也是多行的那种Object.keys()
-      let idx = 0
+      let idx = 0, cy, rowH
       for (let K in this.shownData) {
         let d = this.shownData[K]
         let bubbleNum = Math.min(this.maxBubbleNum, d.length), bbWidth = Math.floor(d.length / bubbleNum)
         d.length = bbWidth * bubbleNum
-        let avg, cx, cy, r, clientW = this.width - margin.left - margin.right,
+        let avg, cx, r, clientW = this.width - margin.left - margin.right,
           clientH = this.height - margin.top - margin.bottom
-        let rowH = clientH / Object.keys(this.shownData).length
+        rowH = clientH / Object.keys(this.shownData).length
 
         for (let i = 0; i < d.length; i += bbWidth) {
           avg = 0
@@ -70,10 +70,53 @@ export default {
           console.log(r)
           // add bubble
           svg.append('g').append('circle').attr('cx', cx).attr('cy', cy).attr('r', r).style('fill', common.colorTheme[idx])
+          // add a little circle to show the index
         }
-
-        idx++
+        // svg.append('g').append('circle').attr('cx', 10).attr('cy', cy).attr('r', 10).style('fill', '#d3d3d3')
+        ++idx
+        // svg.append('g').attr('transform', `translate(10, ${cy})`).append('text').text(`${++idx}`)
       }
+
+      let gBottomCircleSize = 8, leftTextPosX = 12
+      let pointArray = new Array(idx)
+      for(let i = 0; i < idx; ++i)pointArray[i] = i
+      // Left Text and Circle, index of data points
+      let gLeftCircles = svg.append("g");
+      let leftCircles = gLeftCircles.selectAll(".circle")
+        .data(pointArray)
+        .enter()
+        .append("circle")
+        .attr("class", "circle")
+        .attr("transform", function (d, i) {
+          var deltaX = leftTextPosX;
+          var deltaY = i * rowH + rowH / 2 + 2;
+          return "translate(" + deltaX + "," + deltaY + ")";
+        })
+        .attr("r", gBottomCircleSize)
+        .style("fill", "grey")
+        .style("fill-opacity", "1");
+
+      let gLeftTexts = svg.append("g");
+      let leftTexts = gLeftTexts.selectAll(".text")
+        .data(pointArray)
+        .enter()
+        .append("text")
+        .attr("transform", function (d, i) {
+          var deltaX = leftTextPosX - 5;
+
+          if ((i + 1) > 9 && (i + 1) < 20)
+            deltaX = deltaX - 3;
+          else if ((i + 1) >= 20)
+            deltaX = deltaX - 4;
+
+          var deltaY = i * rowH + rowH / 2 + 8;
+          return "translate(" + deltaX + "," + deltaY + ")";
+        })
+        .text(function (d, i) {
+          return i + 1;
+        })
+        .attr("fill", "white");
+
       return svg.node()
     },
     draw(){

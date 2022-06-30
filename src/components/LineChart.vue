@@ -70,7 +70,7 @@ export default {
             d[k] = this.preprocessArray(d[k])
           }
           node = this.createLineChart(d, {
-            yLabel: "Muti Lines",
+            yLabel: "",
             width: this.width,
             height: this.height,
             color: "steelblue",

@@ -1,6 +1,5 @@
 <template>
 <div id="brush">
-
 </div>
 </template>
 
@@ -18,8 +17,14 @@ export default {
   },
   methods:{
     createTimeBrush(){
-      console.log('create new time brush')
+      console.log('create new time brush!')
       d3.select('#brush').selectAll('*').remove()
+      var img = new Image()
+      img.src = require('../assets/bookmark.png')
+      img.width = img.height = 32
+      img.style.position = 'absolute'
+      img.id = 'marker'
+      this.$el.appendChild(img)
       // let cfg = require(`../../static/data/aqi/datasetConfig.json`)
       let height = 120, width = 1024
       let margin = ({top: 10, right: 0, bottom: 20, left: 0}) // svg的边缘，真正用来选取的区域是在里面
@@ -92,6 +97,8 @@ export default {
         if (!event.sourceEvent && !selection) return;
         if (!selection){
           // 处理点击事件
+          let mkx = event.sourceEvent.clientX
+          document.getElementById('marker').style.left = `${mkx}px`
           let t = common.dateFormatter(interval.round(x.invert(event.sourceEvent.clientX))) // 对date要进行一个formatter
           date = {
             "start": t,
@@ -120,10 +127,11 @@ export default {
 
       let hoverLine = svg.append('line')
         .attr("class", "hoverLine")
+        .attr("stroke", 'orange')
         .attr('x1', 0)
         .attr('y1', 0)
         .attr('x2', 0)
-        .attr('y2', height);
+        .attr('y2', 20);
       let tooltip = d3.select('#brush').append('div')
         .attr('class', 'tooltip')
         .style('visibility', 'hidden')
@@ -172,7 +180,7 @@ export default {
           // console.log(this.$el, this.test)
           tooltip
             .style('left', tooltipTarX + 'px')
-            .style('top', this.$el.offsetTop)
+            .style('top', '0px')
             .html(tooltipText)
           // tooltip
         })

@@ -23,23 +23,29 @@
 
 <!--左边是地图-->
     <el-row class="row2">
-      <el-col :span="12" style="padding: 4px">
+      <el-col :span="10" style="padding: 4px">
         <div style="height: 1024px; width: 1024px; background-color: #42b983;">
           <div id="map" style="width: 100%;height: 100%" ref="main-map"></div>
         </div>
       </el-col>
 
-<!--      <div id="line-chart-row1" style="position: absolute; left: 1048px; top: 0px; width: 800px; height: 600px">-->
-        <LineChart v-if="timeAxisMode" class="need-shadow" :shown-data="this.testData" ref="line-chart" style="position: absolute; left: 1048px; top: 0px; width: 1000px; height: 430px">line chart1</LineChart>
-<!--      </div>-->
-<!--      <div id="bubble-chart-row2" style="left: 1048px; top: 620px; width: 800px; height: 600px">-->
-        <AxisBubble v-if="timeAxisMode" class="need-shadow" ref="axis-bubble" :addMouseMove="true" style="position: absolute; left: 1048px; top: 440px; width: 1000px; height: 400px"></AxisBubble>
-<!--      </div>-->
-<!--      <div id="draw-pad-row3" style="left: 1048px; top: 1260px; width: 800px; height: 400px">-->
-        <DrawPad v-if="timeAxisMode" class="need-shadow" style="position: absolute; left: 1048px; top: 850px; width: 1000px; height: 300px"></DrawPad>
-<!--      </div>-->
-<!--      <div id="images-row4" style="left: 1048px; top: 1680px; width: 800px; height: 400px">-->
-        <ImageGallery v-if="!timeAxisMode" class="need-shadow" ref="image-table" style="position: absolute; left: 1048px; top: 0px; width: 800px; "></ImageGallery>
+      <el-col :span="10" v-if="timeAxisMode">
+      <el-row>
+        <p class="block-header" style="width: 1000px">Timelines</p>
+        <AxisBubble v-if="timeAxisMode" class="need-shadow" ref="axis-bubble" :addMouseMove="true" style="width: 1000px; height: 400px"></AxisBubble>
+      </el-row>
+
+      <el-row>
+        <p class="block-header" style="width: 1000px">Query By Scratch</p>
+        <LineChart v-if="timeAxisMode" class="need-shadow" :shown-data="this.testData" ref="line-chart" style="width: 1000px; height: 400px">line chart1</LineChart>
+        <DrawPad v-if="timeAxisMode" class="need-shadow" style="width: 1000px; height: 270px"></DrawPad>
+      </el-row>
+
+      </el-col>
+      <el-col :span="10" v-else>
+        <ImageGallery class="need-shadow" ref="image-table" style="position: absolute; left: 1048px; top: 0px; width: 800px; "></ImageGallery>
+      </el-col>
+
 <!--      </div>-->
 
     </el-row>
@@ -86,6 +92,7 @@
 <!--      <el-col :span="6">-->
       <CurveQuery v-if="this.queryLayer == 'QueryCurve'" :map="this.map"></CurveQuery>
       <RectSelector v-else-if="this.queryLayer == 'QueryArea'" :map="this.map" ref="rect-selector"></RectSelector>
+      <RectSelector v-else-if="this.queryLayer == 'QueryAreaAtALLPos'" :map="this.map" ref="rect-selector" :mode="this.mycommon.atDiffPosition"></RectSelector>
 <!--      </el-col>-->
 <!--    </el-row>-->
   </div>
@@ -119,6 +126,7 @@ export default {
   name: "home",
   data(){
     return{
+      mycommon: common,
       timeAxisMode: true,
       currentDate: {'start':'2022-03-06-00', 'end':'2022-03-06-00'},
       currentDataset: 'aqi',
@@ -154,6 +162,7 @@ export default {
   created() {
 
   },
+
   mounted() {
     this.createMap()
     // this.$refs["rect-selector"].setMap(this.map)
@@ -171,25 +180,7 @@ export default {
     this.hiddenCanvas.height = 1024;
     this.hiddenCtx = this.hiddenCanvas.getContext('2d')
 
-    let colormap = common.getDatasetConfig('colormap')
-    let newcolormap = {}
-    let keys = Object.keys(colormap)
-    for(let i = 0; i < keys.length; ++i) {
-      newcolormap[Number(keys[i])] = colormap[keys[i]]
-    }
-    let heatLayer = L.heatLayer(
-      [],
-      {
-        radius: this.brushSize || 25,
-        // gradient:{0.2: tempColor[0], 0.4: tempColor[1],
-        //   0.6: tempColor[2], 0.8: tempColor[3], 1: tempColor[4]},
-        gradient:newcolormap,
-        max: 0.2,
-        // blur: 20,
-      }
-    )//.addTo(this.map);
-    this.dataLayerGroup.addLayer(heatLayer)
-    this.heatLayer = heatLayer
+    this.updateHeatLayer()
     this.$refs["main-map"].addEventListener('mouseover', () => {
       this.map.dragging.disable();
     })
@@ -225,7 +216,7 @@ export default {
             imgData.data[i+3] = imgData.data[i]
             imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = 0
           }
-          console.log(heatLayer, heatLayer.changeGrayData)
+          // console.log(heatLayer, heatLayer.changeGrayData)
           heatLayer.changeGrayData(imgData)
         }
         img.src = data.url
@@ -284,7 +275,7 @@ export default {
           iconAnchor: [0, 24],
           labelAnchor: [-6, 0],
           popupAnchor: [0, -36],
-          html: `<span style="${markerHtmlStyles}" />`
+          html: `<span style="${markerHtmlStyles}"></span><span style="color: orange;display: inline-block; font-size: 40px; position: absolute;left: 0; top: 0">${idx}</span>`
         })
         let marker = L.marker(latlng, {
           icon: myIcon
@@ -292,10 +283,9 @@ export default {
         this.markerGroup.addLayer(marker)
       }
 
-      let st = new Date(common.getDatasetConfig('timeStart')['string'])
-      let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
-      this.$refs["axis-bubble"].setData(json, [st, ed])
-      this.$refs["axis-bubble"].draw()
+
+      // this.$refs["axis-bubble"].setData(json, [st, ed])
+      // this.$refs["axis-bubble"].draw()
 
       this.$refs["line-chart"].shownData = json
       this.$refs["line-chart"].draw()
@@ -303,29 +293,33 @@ export default {
 
     bus.$on('PutToAxisBubble', (json)=>{
       if(this.$refs["axis-bubble"]) {
-        let st = new Date(common.getDatasetConfig('timeStart')['string'])
-        let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
-        this.$refs["axis-bubble"].setData(json, [st, ed])
+        // let st = new Date(common.getDatasetConfig('timeStart')['string'])
+        // let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
+        this.$refs["axis-bubble"].setData(json, common.getTimeRange())
         this.$refs["axis-bubble"].draw()
       }
     })
 
     // 用heatmap渲染一下小图，然后交给table展示
     bus.$on("RenderAndShowSimilarDatesLooks", (json)=>{
-      // debugger
+      console.log({
+        json,
+        'info': 'show the table data!'
+      })
       let tableData = []
-      let {distance, similar_pth, final_dist, similar_pth_large} = json
+      let {distance, similar_pth, final_dist, similar_pth_large, position} = json
       for(let i = 0; i < distance.length; ++i){
         tableData.push({
+          'id': i+1,
           'distance': json['distance'][i].toFixed(2),
           'similar_pth': json['similar_pth'][i],
           'similar_pth_large': [],// 必须是数组，暂时设置为空 先渲染好再放上去
           'date': /\d+\-\d+\-\d+\-\d+/.exec(json['similar_pth'][i])
         })
       }
-      this.$refs["time-brush"].finalDist = final_dist
-      this.$refs["time-brush"].createTimeBrush()
-
+      // this.$refs["time-brush"].finalDist = final_dist
+      // this.$refs["time-brush"].createTimeBrush()
+      this.$refs["image-table"].draw(final_dist)
       this.$refs["image-table"].tableData = tableData // 更新table
       //预览图colorize
       window.imgs = []; for(let i = 0; i < distance.length; ++i)window.imgs[i] = new Image()
@@ -347,8 +341,6 @@ export default {
           this.heatLayer.colorize(imgData.data)
 
           ctx.putImageData(imgData, 0, 0)
-          // if(Math.random() < 0.2)
-          //   console.log(imgData)
           let dataurl = canvas.toDataURL()
           // 如何找到相应行set 直接修改数据 利于它的响应式？
           this.$refs["image-table"].tableData[i]['similar_pth'] = dataurl
@@ -358,6 +350,9 @@ export default {
       }
       for(let i = 0; i < distance.length; ++i){
         let img = window.imgs[i]
+        let pos = null
+        if (position)
+          pos = position[i]
         // document.body.appendChild(img) // 图片加载正常
         img.onload = async ()=>{
           // debugger
@@ -375,6 +370,15 @@ export default {
             d[i] = d[i+1] = d[i+2] = 0
           }
           this.heatLayer.colorize(imgData.data)
+          if(pos){ // 绘制矩形框1024
+            let [left, bottom, right, top] = pos
+            ctx.putImageData(imgData, 0, 0)
+            ctx.lineWidth = 3
+            ctx.strokeStyle = 'red'
+            ctx.strokeRect(left*16, bottom*16, (right-left)*16, (top-bottom)*16)
+            imgData = ctx.getImageData(0, 0, 1024, 1024)
+            d = imgData.data
+          }
           // console.log(counter)
           // ctx.clearRect(0,0,1024,1024)
           // ctx.putImageData(await common.getMapContainer(), 0, 0) // 这是putImageData直接修改了底层数据，怪不得没有blend的效果，可能那样要调用drawImage api
@@ -433,10 +437,6 @@ export default {
       // }
 
     })
-
-    // 添加一个queryLayer默认pather
-    // this.queryLayer = new L.Pather()
-    // this.map.addLayer(this.queryLayer)
   },
   destroyed() {
     bus.$off('ChangeDataset')
@@ -446,6 +446,30 @@ export default {
     bus.$off('PutToAxisBubble')
   },
   methods:{
+    updateHeatLayer(){
+      if(this.heatLayer)
+        this.dataLayerGroup.removeLayer(this.heatLayer)
+      let colormap = common.getDatasetConfig('colormap')
+      let newcolormap = {}
+      let keys = Object.keys(colormap)
+      for(let i = 0; i < keys.length; ++i) {
+        newcolormap[Number(keys[i])] = colormap[keys[i]]
+      }
+      let heatLayer = L.heatLayer(
+        [],
+        {
+          radius: this.brushSize || 25,
+          // gradient:{0.2: tempColor[0], 0.4: tempColor[1],
+          //   0.6: tempColor[2], 0.8: tempColor[3], 1: tempColor[4]},
+          gradient:newcolormap,
+          max: 0.2,
+          // blur: 20,
+        }
+      )//.addTo(this.map);
+
+      this.dataLayerGroup.addLayer(heatLayer)
+      this.heatLayer = heatLayer
+    },
     generateHeatMap(){
       console.log('[Generate HeatMap]:', this.dateSet)
       window.generatingHeatMap = this.generatingData = true
@@ -480,13 +504,6 @@ export default {
     },
     dateChange(val){
       this.currentDate=val
-      //this.map.remove() // 直接删掉地图对象换新的了。。应该是删掉上面的数据图层罢
-      //this.createMap()
-      // let map = this.map;
-      // map.eachLayer(function (layer) {
-      //   console.log(layer)
-      //   map.removeLayer(layer);
-      // });
       this.draw(this.currentDate,this.currentType)
     },
     typeChange(val){
@@ -680,7 +697,32 @@ export default {
       console.log('flying to new pos', common.currentDataset,[mapConfig['centerLat'], mapConfig['centerLng']], mapConfig['zoom'])
       this.currentDataset = common.getCurrentDataset()
       this.markerGroup.clearLayers()
+      this.updateHeatLayer()
       this.map.flyTo([mapConfig['centerLat'], mapConfig['centerLng']], mapConfig['zoom'])
+    },
+    renderImageFromUrl(url, resolver){
+      let img = new Image()
+      img.onload = async ()=>{
+        let canvas = document.createElement('canvas')
+        canvas.width = canvas.height = img.width
+        let ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0)
+        let imgData = ctx.getImageData(0, 0, img.width, img.height)
+        let d = imgData.data
+        for(let i = 0; i < d.length; i += 4){
+          d[i+3] = d[i] // 强度代表透明度
+          d[i] = d[i+1] = d[i+2] = 0
+        }
+        this.heatLayer.colorize(imgData.data)
+
+        ctx.putImageData(imgData, 0, 0)
+        let dataurl = canvas.toDataURL()
+        // 如何找到相应行set 直接修改数据 利于它的响应式？
+        // this.$refs["image-table"].tableData[i]['similar_pth'] = dataurl
+        resolver(dataurl)
+      }
+      img.crossOrigin = 'anonymous'
+      img.src = similar_pth[i]
     }
   },
   components:{
@@ -706,20 +748,6 @@ export default {
     },
     timeAxisMode: function (newVal){
       this.markerGroup.clearLayers()
-      /*
-      if(newVal){
-        this.queryLayer = new L.Pather({
-          smoothFactor: 10,
-          pathWidth: 3,
-          strokeColour: "#f00"
-        })
-        this.map.addLayer(this.queryLayer)
-      }
-      else{
-        if(this.queryLayer !== undefined)
-          this.map.removeLayer(this.queryLayer)
-      }
-      */
     }
   }
 }
@@ -729,5 +757,13 @@ export default {
 .need-shadow {
   box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2),
   0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.block-header {
+  border-radius: 10px;
+  font-size: 20px;
+  border: 1px solid #ebebeb;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-family: Arial;
 }
 </style>

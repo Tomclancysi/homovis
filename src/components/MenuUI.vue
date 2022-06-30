@@ -16,8 +16,10 @@
     </el-submenu>
     <el-submenu index="3">
       <template slot="title">QueryMethod</template>
-      <el-menu-item index="3-1">QueryArea</el-menu-item>
-      <el-menu-item index="3-2">QueryCurve</el-menu-item>
+      <el-menu-item v-for="(query,index) in this.column3" :index="`3-${index+1}`" :key="index">{{query}}</el-menu-item>
+<!--      <el-menu-item index="3-1">QueryArea</el-menu-item>-->
+<!--      <el-menu-item index="3-2">QueryCurve</el-menu-item>-->
+<!--      <el-menu-item index="3-3">QueryAreaAtALLPos</el-menu-item>-->
 <!--      <el-menu-item index="3-3">bubulemap</el-menu-item>-->
     </el-submenu>
 <!--    <el-menu-item index="4"><a href="https://www.ele.me" target="_blank">订单管理</a></el-menu-item>-->
@@ -34,7 +36,7 @@ export default {
   data(){
     return {
       lastDataset: null,
-      column3: ['QueryArea', 'QueryCurve'],
+      column3: ['QueryArea', 'QueryCurve', 'QueryAreaAtALLPos'],
       datasetNames: common.datasetNames // 灵异事件 我直接data: {}这还不行，必须用函数？
     }
   },
@@ -57,7 +59,7 @@ export default {
         common.setCurrentDataset(newDataset)
         bus.$emit('ChangeDataset', newDataset)
       }
-      else if(key[0] == '3'){// draw method changed
+      else if(key[0] == '3'){// draw method changed 每次往这个col添加都要进行重复的修改，如何让其他模块对修改封闭？
         this.$parent.queryLayer = this.column3[choice]
       }
 

@@ -92,17 +92,17 @@
     "interval": "1 day",
     "type": "heatmap",
     "map": {
-      "centerLat": 39.92656,
-      "centerLng": 116.38655,
+      "centerLat": 39.90656,
+      "centerLng": 116.3700,
       "zoom": 11
     },
     "colormap": {
-      "0.15": "rgb(1,228,0)",
-      "0.30": "rgb(255,255,0)",
-      "0.45": "rgb(255,126,0)",
-      "0.60": "rgb(255,0,0)",
-      "0.75": "rgb(153,0,76)",
-      "1.0": "rgb(126,0,35)"
+      "0.0": "#08041d",
+      "0.19": "#1f0a46",
+      "0.38": "#52076c",
+      "0.57": "#f57c16",
+      "0.76": "#f7cf39",
+      "1.0": "#f7df4a"
     },
     "mapUrl": "/static/dataset/mapcontainer/nightlight.png"
   }
