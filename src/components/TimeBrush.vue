@@ -26,7 +26,7 @@ export default {
       img.id = 'marker'
       this.$el.appendChild(img)
       // let cfg = require(`../../static/data/aqi/datasetConfig.json`)
-      let height = 120, width = 1024
+      let height = 120, width = 820
       let margin = ({top: 10, right: 0, bottom: 20, left: 0}) // svg的边缘，真正用来选取的区域是在里面
       let inter = common.getDatasetConfig("interval"), interval, tickInterval
       // let tickInterval = d3.timeWeek.every(1) // tick的间隔
@@ -44,7 +44,7 @@ export default {
       }
 
       // let tickInterval = d3.timeWeek.every(1) // tick的间隔
-
+      // debugger
       let svg = d3.select('#brush')
         .append('svg')
         .attr('width', `${width}px`)

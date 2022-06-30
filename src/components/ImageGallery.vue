@@ -1,41 +1,37 @@
 <template>
-  <div style="width: 800px; height: 800px">
-    <el-row>
-      <p class="block-header">Distance table</p>
-    </el-row>
-    <el-row>
-      <el-table
-        class="show-table"
-        height="400"
-        :data="tableData"
-        @row-dblclick="onRowDBClick"
-        border
-        stripe
-        >
-        <el-table-column prop="id" label="id" class="col0">
-        </el-table-column>
+  <div style="display: flex; flex-direction: column">
+    <p class="block-header">Distance table</p>
+    <el-table
+      class="show-table"
+      height="400"
+      :data="tableData"
+      @row-dblclick="onRowDBClick"
+      border
+      stripe
+      >
+      <el-table-column prop="id" label="id" class="col0">
+      </el-table-column>
 
-        <el-table-column prop="preview" label="preview" width="180" class="col1">
-          <template slot-scope="scope">
-            <el-image
-              style="width: 64px; height: 64px"
-              :src="scope.row.similar_pth"
-              :preview-src-list="scope.row.similar_pth_large"
-            >
-              <div slot="error" class="image-slot">
-                <i class="el-icon-picture-outline"></i>
-              </div>
-            </el-image>
-          </template>
-        </el-table-column>
+      <el-table-column prop="preview" label="preview" width="180" class="col1">
+        <template slot-scope="scope">
+          <el-image
+            style="width: 64px; height: 64px"
+            :src="scope.row.similar_pth"
+            :preview-src-list="scope.row.similar_pth_large"
+          >
+            <div slot="error" class="image-slot">
+              <i class="el-icon-picture-outline"></i>
+            </div>
+          </el-image>
+        </template>
+      </el-table-column>
 
-        <el-table-column prop="date" label="date" width="180" class="col2">
-        </el-table-column>
+      <el-table-column prop="date" label="date" width="180" class="col2">
+      </el-table-column>
 
-        <el-table-column prop="distance" label="distance" class="col3">
-        </el-table-column>
-      </el-table>
-    </el-row>
+      <el-table-column prop="distance" label="distance" class="col3">
+      </el-table-column>
+    </el-table>
 
     <el-row>
       <el-col :span="10">
@@ -47,10 +43,8 @@
         </el-button>
       </el-col>
     </el-row>
-    <el-row>
-      <div id="distance-curve"></div>
-    </el-row>
 
+    <div id="distance-curve" class="border-base" ref="distance-curve" style="height: 200px; padding-bottom: 10px"></div>
   </div>
 </template>
 
@@ -89,7 +83,8 @@ export default {
       }
     },
     draw(dist){
-      // dist [1,1,1,3,3,4,]
+      this.width = common.getLengthFromStyleStr(getComputedStyle(this.$el, null).getPropertyValue('width'))
+      this.height = common.getLengthFromStyleStr(this.$refs["distance-curve"].style.height)
       this.distanceData = dist
       d3.selectAll('#distance-curve > *').remove()
       var svg = d3.create('svg').attr('width', this.width).attr('height', this.height)
@@ -109,6 +104,7 @@ export default {
       svg.append('g').attr("transform", `translate(${margin.left} ,0)`).call(d3.axisLeft(yScale).ticks(7))
 
       var area = d3.area()
+                  .curve(d3.curveBasis)
                   .x(function(d, i) {return x(i)})
                   .y1(function(d){return yScale(d)})
                   .y0(yScale(0))
@@ -165,23 +161,21 @@ export default {
     }
   },
   mounted() {
-    let w = this.$el.style.width, h = this.$el.style.height
-    w = Number(w.substr(0, w.length-2))
-    h = Number(h.substr(0, h.length-2))
-    this.width = w
-    this.height = h - 400 - 90 // 减去表格 两个栏目的大小
-    console.log('height is ',this.height)
+
   }
 }
 </script>
 
 <style scoped>
 .block-header {
-  border-radius: 10px;
+  border-radius: 0.25rem;
   font-size: 20px;
-  border: 1px solid #ebebeb;
+  border: 1px solid rgba(156, 163, 175, 0.5);
   padding-top: 10px;
   padding-bottom: 10px;
-  font-family: Arial;
+  background-color: rgba(156, 163, 175, 0.15);
+}
+.border-base{
+  border: 1px solid rgba(156, 163, 175, 0.5);
 }
 </style>

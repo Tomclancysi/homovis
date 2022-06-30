@@ -1,5 +1,5 @@
 <template>
-<div :style="{height: height+'px', width: width+'px'}" ref="main-div"></div>
+<div ref="main-div"></div>
 </template>
 
 <script>
@@ -238,7 +238,8 @@ export default {
       }
   },
   mounted() {
-    let w = this.$el.style.width, h = this.$el.style.height
+    let w = getComputedStyle(this.$el,null).getPropertyValue('width')
+    let h = this.$el.style.height
     w = Number(w.substr(0, w.length-2))
     h = Number(h.substr(0, h.length-2))
     this.width = w

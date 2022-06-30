@@ -73,6 +73,15 @@ function getDrawType(){
   return drawType || 'heat'
 }
 
+function getLengthFromStyleStr(str){
+  if(!str)
+    return 0
+  if(str.indexOf('px') != -1)
+    return Number(str.substr(0, str.length - 2))
+  else if(str.indexOf('rem') != -1)
+    return Number(str.substr(0, str.length - 3)) * 16
+}
+
 let dateFormatter = (date)=>{
   let y = date.getFullYear()
   let m = date.getMonth() + 1
@@ -120,6 +129,7 @@ export default {
   getOp,
   setDrawType,
   getDrawType,
+  getLengthFromStyleStr,
 
   queryDateRange(Date){
     // console.log(getCurrentDate(), getCurrentDataset())

@@ -132,7 +132,8 @@ export default {
   //   }
   // }
   mounted() {
-    let w = this.$el.style.width, h = this.$el.style.height
+    let w = getComputedStyle(this.$el,null).getPropertyValue('width')
+    let h = this.$el.style.height
     w = Number(w.substr(0, w.length-2))
     h = Number(h.substr(0, h.length-2))
     this.width = w
@@ -140,10 +141,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.axis-bubble{
-  width: 500px;
-  height: 100px;
-}
-</style>

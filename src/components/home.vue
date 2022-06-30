@@ -2,60 +2,46 @@
   <div style="margin-bottom: 0">
 <!--左边是2个框-->
     <MenuUI></MenuUI>
-    <el-row :gutter="20" class="row1">
-      <el-col :span="3">
-        <el-tag type="success">lng:{{this.lng.toFixed(2)}}</el-tag>
-        <el-tag type="success">lat:{{this.lat.toFixed(2)}}</el-tag>
-      </el-col>
-      <el-col :span="3" class="current-date-range">
-        <el-tag type="success">Date: {{this.currentDate.start == this.currentDate.end ? this.currentDate.start : `${this.currentDate.start} to ${this.currentDate.end}`}}</el-tag>
-      </el-col>
-      <el-col :span="3">
-        <span class="label">Mode</span>
+    <div class="flex-container" style="justify-content: center; align-items: center">
+      <div class="font-mono">
+        <el-tag type="success" style="width: 132px; height: 32px; box-sizing: content-box;">LatLng:({{this.lat.toFixed(2)}},{{this.lng.toFixed(2)}})</el-tag>
+        <el-tag type="success" style="height: 32px; box-sizing: content-box;">CurrentDate:{{this.currentDate.start == this.currentDate.end ? this.currentDate.start : `${this.currentDate.start} to ${this.currentDate.end}`}}</el-tag>
+      </div>
+      <el-tag type="success" style="height: 32px; box-sizing: content-box">
+        <span class="label font-mono" style="font-weight: bold">Mode</span>
         <el-switch
           v-model="timeAxisMode"
           active-color="#13ce66"
           inactive-color="#ff4949">
         </el-switch>
-      </el-col>
-    </el-row>
+      </el-tag>
+    </div>
 
 
 <!--左边是地图-->
-    <el-row class="row2">
-      <el-col :span="10" style="padding: 4px">
-        <div style="height: 1024px; width: 1024px; background-color: #42b983;">
-          <div id="map" style="width: 100%;height: 100%" ref="main-map"></div>
-        </div>
+    <el-row class="row2" :gutter="10">
+      <el-col :span="12">
+        <div id="map" style="width: 820px; height: 820px" ref="main-map"></div>
+        <TimeBrush ref="time-brush" >brush</TimeBrush>
       </el-col>
 
       <el-col :span="10" v-if="timeAxisMode">
-      <el-row>
-        <p class="block-header" style="width: 1000px">Timelines</p>
-        <AxisBubble v-if="timeAxisMode" class="need-shadow" ref="axis-bubble" :addMouseMove="true" style="width: 1000px; height: 400px"></AxisBubble>
-      </el-row>
 
-      <el-row>
-        <p class="block-header" style="width: 1000px">Query By Scratch</p>
-        <LineChart v-if="timeAxisMode" class="need-shadow" :shown-data="this.testData" ref="line-chart" style="width: 1000px; height: 400px">line chart1</LineChart>
-        <DrawPad v-if="timeAxisMode" class="need-shadow" style="width: 1000px; height: 270px"></DrawPad>
-      </el-row>
+        <el-row :span="24">
+          <p class="block-header font-mono" >Timelines</p>
+          <AxisBubble v-if="timeAxisMode" class="need-shadow" ref="axis-bubble" :addMouseMove="true" style="height: 300px"></AxisBubble>
+          <p class="block-header font-mono">Query By Scratch</p>
+          <LineChart v-if="timeAxisMode" class="border-base" :shown-data="this.testData" ref="line-chart" style="height: 300px">line chart1</LineChart>
+          <DrawPad v-if="timeAxisMode" class="need-shadow" style="height: 233px"></DrawPad>
+        </el-row>
 
       </el-col>
       <el-col :span="10" v-else>
-        <ImageGallery class="need-shadow" ref="image-table" style="position: absolute; left: 1048px; top: 0px; width: 800px; "></ImageGallery>
-      </el-col>
 
-<!--      </div>-->
-
-    </el-row>
-
-<!--    <el-row class="row3">-->
-<!--      <el-col :span="10">-->
-        <TimeBrush ref="time-brush" style="position: absolute; left: 0px; top: 1124px; width: 1024px; height: 120px">brush</TimeBrush>
-<!--      </el-col>-->
-<!--      <el-col :span="6">-->
-        <div v-if="!timeAxisMode" ref="panel" style="position: absolute; left: 1048px; top: 1124px; width: 800px; height: 400px">
+        <ImageGallery class="need-shadow font-mono" ref="image-table" style="height: 750px"></ImageGallery>
+        <div style="height: 30px"/>
+        <!-- 下面那一栏的一些选项框Panel -->
+        <div class="border-base font-mono" ref="panel" style="width: 100%; height: 140px">
 
           <div>
             <template>
@@ -81,26 +67,33 @@
           </div>
 
           <div class="slider">
-            <span class="demonstration">brush size of heatmap</span>
+            <span class="demonstration" style="font-weight: bold">brush size of heatmap</span>
             <el-slider v-model="brushSize"></el-slider>
           </div>
+
           <el-button type="primary" :disabled="this.disabled" :loading="this.generatingData" @click.native="generateHeatMap()">{{this.generatingData?'Loading':'GenerateHeatMap'}}</el-button>
         </div>
-<!--      </el-col>-->
-<!--    </el-row>-->
-<!--    <el-row>-->
-<!--      <el-col :span="6">-->
-      <CurveQuery v-if="this.queryLayer == 'QueryCurve'" :map="this.map"></CurveQuery>
-      <RectSelector v-else-if="this.queryLayer == 'QueryArea'" :map="this.map" ref="rect-selector"></RectSelector>
-      <RectSelector v-else-if="this.queryLayer == 'QueryAreaAtALLPos'" :map="this.map" ref="rect-selector" :mode="this.mycommon.atDiffPosition"></RectSelector>
-<!--      </el-col>-->
-<!--    </el-row>-->
+      </el-col>
+    </el-row>
+
+
+    <!-- 一些功能性的vue -->
+    <CurveQuery v-if="this.queryLayer == 'QueryCurve'" :map="this.map"></CurveQuery>
+    <RectSelector v-else-if="this.queryLayer == 'QueryArea'" :map="this.map" ref="rect-selector"></RectSelector>
+    <RectSelector v-else-if="this.queryLayer == 'QueryAreaAtALLPos'" :map="this.map" ref="rect-selector" :mode="this.mycommon.atDiffPosition"></RectSelector>
+
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3';
 window.d3 = d3
+// window.onload = function (){
+//   let el = document.getElementById('map')
+//   let w = getComputedStyle(el,null).getPropertyValue('width')
+//   console.log(`width is ${w}`)
+//   el.style.height = w
+// }
 // import "../plugins/leaflet-d3/src/js/hexbin/HexbinLayer";
 // import "heatmap.js";
 import "@asymmetrik/leaflet-d3";
@@ -141,6 +134,8 @@ export default {
       heatLayer: null,
       hiddenCanvas: null,
       hiddenCtx: null,
+      imgSize: 1024,
+      showImgSize: 820,
       markerGroup: null,
 
       op: 'avg',
@@ -165,19 +160,14 @@ export default {
 
   mounted() {
     this.createMap()
-    // this.$refs["rect-selector"].setMap(this.map)
     this.loadData()
-    //this.draw(this.currentDate,this.currentType)
-    // 测试bubble map用的
+
     let st = new Date(common.getDatasetConfig('timeStart')['string'])
     let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
-
-    // this.$refs["axis-bubble"].setData(this.testData, [st, ed])
-    // this.$refs["axis-bubble"].draw()
-
-    this.hiddenCanvas = document.createElement('canvas');
-    this.hiddenCanvas.width = 1024; //又又又又又又又又又又又一个hardcode，记得更改
-    this.hiddenCanvas.height = 1024;
+    this.showImgSize = common.getLengthFromStyleStr(getComputedStyle(this.$refs["main-map"]).getPropertyValue('width'))
+    this.hiddenCanvas = document.createElement('canvas')
+    this.hiddenCanvas.width = this.imgSize //又又又又又又又又又又又一个hardcode，记得更改
+    this.hiddenCanvas.height = this.imgSize
     this.hiddenCtx = this.hiddenCanvas.getContext('2d')
 
     this.updateHeatLayer()
@@ -187,7 +177,6 @@ export default {
     this.$refs["main-map"].addEventListener('mouseout', () => {
       this.map.dragging.enable();
     })
-
 
     //menu 触发切换数据集
     bus.$on("ChangeDataset", this.flyTo)
@@ -207,10 +196,11 @@ export default {
         // 开始一坨极其冗余的代码，这属实南辕北辙了
         let img = new Image()
         img.crossOrigin = 'anonymous'
-        img.onload = () => {
+        img.onload = (() => {
           // 再把这个img搞到canvas上获取pixel数组，最后pixel数组colorlize，放到热力图上
           this.hiddenCtx.drawImage(img, 0, 0)
-          let imgData = this.hiddenCtx.getImageData(0, 0, this.hiddenCanvas.width, this.hiddenCanvas.height)
+          let offset = (this.imgSize - this.showImgSize) / 2
+          let imgData = this.hiddenCtx.getImageData(offset, offset, this.showImgSize, this.showImgSize)
           // 或许直接把这玩意清理一下发过去算了吧，changeGrayData 接受的就是没有着色的imgdata
           for(let i = 0; i < imgData.data.length; i += 4){
             imgData.data[i+3] = imgData.data[i]
@@ -218,32 +208,8 @@ export default {
           }
           // console.log(heatLayer, heatLayer.changeGrayData)
           heatLayer.changeGrayData(imgData)
-        }
+        }).bind(this)
         img.src = data.url
-
-        // axios
-        //   .get(data.url, {
-        //     responseType: 'arraybuffer',
-        //   })
-        //   .then((response) => {
-        //     console.log(response)
-        //     return  window.URL.createObjectURL(new Blob(response.data));
-        //   })
-        //   .then(dataurl => {
-        //     let img = new Image()
-        //     img.onload = ()=>{
-        //       // 再把这个img搞到canvas上获取pixel数组，最后pixel数组colorlize，放到热力图上
-        //       this.hiddenCtx.drawImage(img, 0, 0)
-        //       let imgData = this.hiddenCtx.getImageData(0, 0, this.hiddenCanvas.width, this.hiddenCanvas.height)
-        //       // 或许直接把这玩意清理一下发过去算了吧，changeGrayData 接受的就是没有着色的imgdata
-        //       for(let i = 0; i < imgData.data.length; i += 4){
-        //         imgData.data[i+3] = imgData.data[i]
-        //         imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = 0
-        //       }
-        //       this.heatLayer.changeGrayData(imgData)
-        //     }
-        //     img.src = dataurl
-        //   })
       })
     })
 
@@ -253,7 +219,7 @@ export default {
       let idx = 0
       this.markerGroup.clearLayers()
       for(let k in json) {
-        let p = L.point(k % 1024, k / 1024)
+        let p = L.point(k % this.imgSize, k / this.imgSize)
         let latlng = this.map.layerPointToLatLng(p)
         const myCustomColour = common.colorTheme[idx++]
 
@@ -293,8 +259,6 @@ export default {
 
     bus.$on('PutToAxisBubble', (json)=>{
       if(this.$refs["axis-bubble"]) {
-        // let st = new Date(common.getDatasetConfig('timeStart')['string'])
-        // let ed = new Date(common.getDatasetConfig('timeEnd')['string'])
         this.$refs["axis-bubble"].setData(json, common.getTimeRange())
         this.$refs["axis-bubble"].draw()
       }
@@ -332,7 +296,7 @@ export default {
           canvas.width = canvas.height = img.width
           let ctx = canvas.getContext('2d')
           ctx.drawImage(img, 0, 0)
-          let imgData = ctx.getImageData(0, 0, 1024, 1024)
+          let imgData = ctx.getImageData(0, 0, this.imgSize, this.imgSize)
           let d = imgData.data
           for(let i = 0; i < d.length; i += 4){
             d[i+3] = d[i] // 强度代表透明度
@@ -357,11 +321,11 @@ export default {
         img.onload = async ()=>{
           // debugger
           let canvas = document.createElement('canvas')
-          canvas.width = canvas.height = 1024
+          canvas.width = canvas.height = this.imgSize
           let ctx = canvas.getContext('2d')
           // 读取pixel， image load
           ctx.drawImage(img, 0, 0)
-          let imgData = ctx.getImageData(0, 0, 1024, 1024)
+          let imgData = ctx.getImageData(0, 0, this.imgSize, this.imgSize)
           let d = imgData.data
           let counter = []; for(let t = 0; t < 256; ++t)counter[t] = 0;
           for(let i = 0; i < d.length; i += 4){
@@ -370,17 +334,17 @@ export default {
             d[i] = d[i+1] = d[i+2] = 0
           }
           this.heatLayer.colorize(imgData.data)
-          if(pos){ // 绘制矩形框1024
+          if(pos){ // 绘制矩形框this.imgSize
             let [left, bottom, right, top] = pos
             ctx.putImageData(imgData, 0, 0)
             ctx.lineWidth = 3
             ctx.strokeStyle = 'red'
             ctx.strokeRect(left*16, bottom*16, (right-left)*16, (top-bottom)*16)
-            imgData = ctx.getImageData(0, 0, 1024, 1024)
+            imgData = ctx.getImageData(0, 0, this.imgSize, this.imgSize)
             d = imgData.data
           }
           // console.log(counter)
-          // ctx.clearRect(0,0,1024,1024)
+          // ctx.clearRect(0,0,this.imgSize,this.imgSize)
           // ctx.putImageData(await common.getMapContainer(), 0, 0) // 这是putImageData直接修改了底层数据，怪不得没有blend的效果，可能那样要调用drawImage api
           let bg = await common.getMapContainer(), alpha, beta // background map
           function clip(a, b, c){
@@ -483,7 +447,6 @@ export default {
       // test
       let idx = 0
       for(let key of this.dateSet){
-        // if(idx++)break;
         let heatLayer = L.heatLayer(
           this.data[key],
           {
@@ -507,7 +470,6 @@ export default {
       this.draw(this.currentDate,this.currentType)
     },
     typeChange(val){
-      //console.log('type',val)
       this.currentType=val
       this.map.remove()
       this.createMap()
@@ -567,7 +529,6 @@ export default {
       this.dateSet.sort()
     },
     draw(date,type){// L 负责创建对象，添加到addTo map对象上面去
-      // debugger
       // 有的数据精确到2小时，有的只是一天
       let l = Object.keys(this.data)[0].length
       date = date.substr(0, l)
@@ -754,16 +715,27 @@ export default {
 </script>
 
 <style scoped>
+.flex-container{
+  display: flex;
+  grid-gap: 0.5rem;
+  gap: 0.5rem;
+}
 .need-shadow {
   box-shadow: 0 8px 17px 0 rgba(0, 0, 0, 0.2),
   0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 .block-header {
-  border-radius: 10px;
+  border-radius: 0.25rem;
   font-size: 20px;
-  border: 1px solid #ebebeb;
+  border: 1px solid rgba(156, 163, 175, 0.5);
   padding-top: 10px;
   padding-bottom: 10px;
-  font-family: Arial;
+  background-color: rgba(156, 163, 175, 0.15);
+}
+.border-base{
+  border: 1px solid rgba(156, 163, 175, 0.5);
+}
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 </style>

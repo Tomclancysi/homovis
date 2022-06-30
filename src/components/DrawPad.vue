@@ -1,6 +1,6 @@
 <template>
   <div id="timelines" ref="main-div">
-    <canvas id="canvasSignature" ref="sigCanvas" @mousedown="this.onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp" @mouseout="onMouseOut" width="500" height="200"></canvas>
+    <canvas id="canvasSignature" ref="sigCanvas" @mousedown="this.onMouseDown" @mousemove="onMouseMove" @mouseup="onMouseUp" @mouseout="onMouseOut" width="684" height="230"></canvas>
   </div>
 </template>
 
@@ -204,18 +204,18 @@ export default {
 
 
     initialize() {
-      //this.$refs.sigCanvas.width = 500
-      //this.$refs.sigCanvas.height = 200
       this.sigCanvas = this.$refs.sigCanvas
       this.context = this.sigCanvas.getContext("2d")
       this.context.strokeStyle = '#c2326c' // 离谱 这里设置过为啥不行？？
-      let w = this.$el.style.width, h = this.$el.style.height
-      w = Number(w.substr(0, w.length-2))
-      h = Number(h.substr(0, h.length-2))
-      this.width = w
-      this.height = h
-      this.sigCanvas.width = w
-      this.sigCanvas.height = h
+      // let w = this.$el.style.width, h = this.$el.style.height
+      // w = Number(w.substr(0, w.length-2))
+      // h = Number(h.substr(0, h.length-2))
+      // this.width = w
+      // this.height = h
+      // this.sigCanvas.width = w
+      // this.sigCanvas.height = h
+      this.width = this.sigCanvas.width
+      this.height = this.sigCanvas.height
       let bbox = this.$refs.sigCanvas.getBoundingClientRect()
       this.offsetLeft = bbox.left
       this.offsetTop = bbox.top
