@@ -39,8 +39,9 @@ export default {
 
         // this.map.dragging.disable()
         let a = this.map.latLngToContainerPoint(e.bounds._northEast), b = this.map.latLngToContainerPoint(e.bounds._southWest)
-        let minx = Math.min(a.x, b.x), maxx = Math.max(a.x, b.x)
-        let miny = Math.min(a.y, b.y), maxy = Math.max(a.y, b.y)
+        let offset = (1024 - this.map.getSize().x) / 2
+        let minx = Math.min(a.x, b.x) + offset, maxx = Math.max(a.x, b.x) + offset
+        let miny = Math.min(a.y, b.y) + offset, maxy = Math.max(a.y, b.y) + offset
         this.query(minx, maxx, miny, maxy)
       })
     },
@@ -69,10 +70,11 @@ export default {
           })
       }
       else{
-        minx = parseInt(minx / 1024 * 64);
-        miny = parseInt(miny / 1024 * 64);
-        maxx = parseInt(maxx / 1024 * 64);
-        maxy = parseInt(maxy / 1024 * 64);
+        let size = 1024
+        minx = parseInt(minx / size * 64);
+        miny = parseInt(miny / size * 64);
+        maxx = parseInt(maxx / size * 64);
+        maxy = parseInt(maxy / size * 64);
         let reqUrl
         if(this.mode == common.atSamePosition) {
           reqUrl = common.queryRectAreaSimilar(minx, maxx, miny, maxy)

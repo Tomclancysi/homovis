@@ -70,8 +70,9 @@ export default {
     },
     query(points){
       // points is array of object Point, which is not serizeabole so change it to normal json
+      let offset = (1024 - this.map.getSize().x) / 2
       points = points.map((item)=>{
-        return {x: item.x, y: item.y}
+        return {x: parseInt(offset + item.x), y: parseInt(offset + item.y)}
       })
       this.$axios({
         url: common.queryTimelineOfPoint(),

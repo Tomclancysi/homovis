@@ -1,4 +1,4 @@
-# covid_sh
+# HOMOHOMOHOMO
 
 > A Vue.js project
 
@@ -19,3 +19,10 @@ npm run build --report
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+UI
+
+![UI界面0](ui mode0.png)
+
+![UI界面1](ui mode1.png)
+
