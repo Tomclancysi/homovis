@@ -1,37 +1,46 @@
 <template>
   <div style="display: flex; flex-direction: column">
     <p class="block-header">Distance table</p>
-    <el-table
-      class="show-table"
-      height="400"
-      :data="tableData"
-      @row-dblclick="onRowDBClick"
-      border
-      stripe
-      >
-      <el-table-column prop="id" label="id" class="col0">
-      </el-table-column>
+    <el-row style="height: 400px">
+      <el-col :span="12">
+        <el-table
+          class="show-table"
+          height="400"
+          :data="tableData"
+          @row-dblclick="onRowDBClick"
+          border
+          stripe
+        >
+          <el-table-column prop="id" label="id" class="col0">
+          </el-table-column>
 
-      <el-table-column prop="preview" label="preview" width="180" class="col1">
-        <template slot-scope="scope">
-          <el-image
-            style="width: 64px; height: 64px"
-            :src="scope.row.similar_pth"
-            :preview-src-list="scope.row.similar_pth_large"
-          >
-            <div slot="error" class="image-slot">
-              <i class="el-icon-picture-outline"></i>
-            </div>
-          </el-image>
-        </template>
-      </el-table-column>
+          <el-table-column prop="preview" label="preview"  class="col1">
+            <template slot-scope="scope">
+              <el-image
+                style="width: 64px; height: 64px"
+                :src="scope.row.similar_pth"
+                :preview-src-list="scope.row.similar_pth_large"
+              >
+                <div slot="error" class="image-slot">
+                  <i class="el-icon-picture-outline"></i>
+                </div>
+              </el-image>
+            </template>
+          </el-table-column>
 
-      <el-table-column prop="date" label="date" width="180" class="col2">
-      </el-table-column>
+          <el-table-column prop="date" label="date"  class="col2">
+          </el-table-column>
 
-      <el-table-column prop="distance" label="distance" class="col3">
-      </el-table-column>
-    </el-table>
+          <el-table-column prop="distance" label="distance" class="col3">
+          </el-table-column>
+        </el-table>
+      </el-col>
+      <el-col :span="12" style="height: 100%">
+        <LassoWithUmap style="height: 100%"></LassoWithUmap>
+      </el-col>
+
+    </el-row>
+
 
     <el-row>
       <el-col :span="10">
@@ -51,9 +60,11 @@
 <script>
 import * as d3 from "d3"
 import common from "./common";
+import LassoWithUmap from "./lassoWithUmap";
 
 export default {
   name: "ImageGallery",
+  components: {LassoWithUmap},
   data(){
     return {
       width: null,

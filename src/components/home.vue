@@ -86,8 +86,7 @@
 </template>
 
 <script>
-import * as d3 from 'd3';
-window.d3 = d3
+
 // window.onload = function (){
 //   let el = document.getElementById('map')
 //   let w = getComputedStyle(el,null).getPropertyValue('width')
@@ -194,22 +193,23 @@ export default {
         let data = json.data // 包含 url status similar path
         // 请求给的这个链接,拿到底层pixel数组，换一下热力图底图
         // 开始一坨极其冗余的代码，这属实南辕北辙了
-        let img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = (() => {
-          // 再把这个img搞到canvas上获取pixel数组，最后pixel数组colorlize，放到热力图上
-          this.hiddenCtx.drawImage(img, 0, 0)
-          let offset = (this.imgSize - this.showImgSize) / 2
-          let imgData = this.hiddenCtx.getImageData(offset, offset, this.showImgSize, this.showImgSize)
-          // 或许直接把这玩意清理一下发过去算了吧，changeGrayData 接受的就是没有着色的imgdata
-          for(let i = 0; i < imgData.data.length; i += 4){
-            imgData.data[i+3] = imgData.data[i]
-            imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = 0
-          }
-          // console.log(heatLayer, heatLayer.changeGrayData)
-          heatLayer.changeGrayData(imgData)
-        }).bind(this)
-        img.src = data.url
+        this.changeHeatMapWithURLImg(data.url)
+        // let img = new Image()
+        // img.crossOrigin = 'anonymous'
+        // img.onload = (() => {
+        //   // 再把这个img搞到canvas上获取pixel数组，最后pixel数组colorlize，放到热力图上
+        //   this.hiddenCtx.drawImage(img, 0, 0)
+        //   let offset = (this.imgSize - this.showImgSize) / 2
+        //   let imgData = this.hiddenCtx.getImageData(offset, offset, this.showImgSize, this.showImgSize)
+        //   // 或许直接把这玩意清理一下发过去算了吧，changeGrayData 接受的就是没有着色的imgdata
+        //   for(let i = 0; i < imgData.data.length; i += 4){
+        //     imgData.data[i+3] = imgData.data[i]
+        //     imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = 0
+        //   }
+        //   // console.log(heatLayer, heatLayer.changeGrayData)
+        //   heatLayer.changeGrayData(imgData)
+        // }).bind(this)
+        // img.src = data.url
       })
     })
 
@@ -219,7 +219,7 @@ export default {
       let idx = 0
       this.markerGroup.clearLayers()
       for(let k in json) {
-        let p = L.point(k % this.imgSize, k / this.imgSize)
+        let p = L.point((k % this.imgSize) / this.imgSize * this.showImgSize, (k / this.imgSize) / this.imgSize * this.showImgSize)
         let latlng = this.map.layerPointToLatLng(p)
         const myCustomColour = common.colorTheme[idx++]
 
@@ -241,7 +241,7 @@ export default {
           iconAnchor: [0, 24],
           labelAnchor: [-6, 0],
           popupAnchor: [0, -36],
-          html: `<span style="${markerHtmlStyles}"></span><span style="color: orange;display: inline-block; font-size: 40px; position: absolute;left: 0; top: 0">${idx}</span>`
+          html: `<span style="${markerHtmlStyles}"></span><span style="color: orange;display: inline-block; font-size: 40px; position: absolute;left: -11px; top: -21px">${idx}</span>`
         })
         let marker = L.marker(latlng, {
           icon: myIcon
@@ -401,6 +401,8 @@ export default {
       // }
 
     })
+
+    bus.$on('changeHeatMapWithURLImg', this.changeHeatMapWithURLImg)
   },
   destroyed() {
     bus.$off('ChangeDataset')
@@ -408,6 +410,7 @@ export default {
     bus.$off('WhoCanShowThis')
     bus.$off("RenderAndShowSimilarDatesLooks")
     bus.$off('PutToAxisBubble')
+    bus.$off('changeHeatMapWithURLImg')
   },
   methods:{
     updateHeatLayer(){
@@ -528,8 +531,7 @@ export default {
       }
       this.dateSet.sort()
     },
-    draw(date,type){// L 负责创建对象，添加到addTo map对象上面去
-      // 有的数据精确到2小时，有的只是一天
+    draw(date,type){// L 负责创建对象，添加到addTo map对象上面 有的数据精确到2小时，有的只是一天
       let l = Object.keys(this.data)[0].length
       date = date.substr(0, l)
       let data=this.data[date]
@@ -660,6 +662,24 @@ export default {
       this.markerGroup.clearLayers()
       this.updateHeatLayer()
       this.map.flyTo([mapConfig['centerLat'], mapConfig['centerLng']], mapConfig['zoom'])
+    },
+    changeHeatMapWithURLImg(url){
+      let img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = (() => {
+        // 再把这个img搞到canvas上获取pixel数组，最后pixel数组colorlize，放到热力图上
+        this.hiddenCtx.drawImage(img, 0, 0)
+        let offset = (this.imgSize - this.showImgSize) / 2
+        let imgData = this.hiddenCtx.getImageData(offset, offset, this.showImgSize, this.showImgSize)
+        // 或许直接把这玩意清理一下发过去算了吧，changeGrayData 接受的就是没有着色的imgdata
+        for(let i = 0; i < imgData.data.length; i += 4){
+          imgData.data[i+3] = imgData.data[i]
+          imgData.data[i] = imgData.data[i+1] = imgData.data[i+2] = 0
+        }
+        // console.log(heatLayer, heatLayer.changeGrayData)
+        this.heatLayer.changeGrayData(imgData)
+      }).bind(this)
+      img.src = url
     },
     renderImageFromUrl(url, resolver){
       let img = new Image()

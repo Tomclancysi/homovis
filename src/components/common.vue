@@ -135,6 +135,10 @@ export default {
     // console.log(getCurrentDate(), getCurrentDataset())
     return `/query/requestrange?start_date=${Date.start}&end_date=${Date.end}&op=${this.getOp()}&dataset=${getCurrentDataset()}`
   },
+  queryOpOfSelected(selected){
+    // actually the selected is a list of selected points is stored in post body
+    return `/query/requestSelectedDates?op=${this.getOp()}&dataset=${getCurrentDataset()}`
+  },
   queryRectAreaSimilar(minx, maxx, miny, maxy){// 在这里直接就转成了后端对应的位置，这不合理
     let date = getCurrentDate()
     return `/query/requestrect?start_date=${date.start}&end_date=${date.end}&minx=${minx}` +

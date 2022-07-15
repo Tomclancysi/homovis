@@ -1,5 +1,5 @@
 <template>
-<div id="brush">
+<div id="brush" style="position: relative">
 </div>
 </template>
 
@@ -176,13 +176,15 @@ export default {
           // if (tooltipTarX > limitMaxTooltipTarX) {
           //   tooltipTarX = event.pageX - limitOffsetTooltipX
           // }
-          // debugger
-          // console.log(this.$el, this.test)
+
           tooltip
             .style('left', tooltipTarX + 'px')
             .style('top', '0px')
+            .style('border', '1px solid rgba(163, 163, 163, 0.3)')
+            .style('border-radius', '7px')
+            .style('background', 'rgba(255, 255, 255, 0.9)')
+            .style('color', '#000')
             .html(tooltipText)
-          // tooltip
         })
         .on('mouseover', () => {
           hoverLine.style("stroke-width", '1px');
@@ -244,6 +246,15 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style>
+.tooltip {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  font-size: 12px;
+  color: #000;
+}
 </style>

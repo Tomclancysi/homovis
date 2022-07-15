@@ -242,9 +242,9 @@ export default {
     let h = this.$el.style.height
     w = Number(w.substr(0, w.length-2))
     h = Number(h.substr(0, h.length-2))
-    this.width = w
-    this.height = h
-    // 有选择的加？
+    this.width = this.$el.clientWidth
+    this.height = this.$el.clientHeight
+    console.log('just this simple line chart')
     this.$el.addEventListener("mousemove", this.mouseMoveHandle)
     // 还是列一个图例，然后鼠标hover的时候，触发
 

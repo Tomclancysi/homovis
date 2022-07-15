@@ -11,7 +11,7 @@ import mapBoxGl from 'mapbox-gl'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import Axios from 'axios'
-
+import * as d3 from 'd3'
 Vue.use(ElementUI);
 
 Vue.config.productionTip = false
@@ -19,9 +19,8 @@ Vue.prototype.$mapboxgl = mapBoxGl
 Vue.prototype.$map = { _leaflet_id: -1 }
 
 window.L = Vue.L = Vue.prototype.$L = L
-
 window.axios = Vue.prototype.$axios = Axios
-
+window.d3 = d3
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
